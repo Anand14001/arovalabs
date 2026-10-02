@@ -1,0 +1,303 @@
+@import 'tailwindcss';
+
+/*
+ * Phase 1 theme tokens, read from the reference site's Elementor globals
+ * (/wp-content/uploads/elementor/css/post-7.css).
+ * Phase 2 can retheme the whole site by editing only this block.
+ */
+@theme {
+  --color-brand: #2b7e83;
+  --color-brand-dark: #1f5f63;
+  --color-brand-light: #e8f2f3;
+  --color-accent: #ef8a06;
+  --color-accent-dark: #d77a05;
+  --color-accent-light: #fef3e2;
+  --color-ink: #181511;
+  --color-ink-soft: #1c130d;
+  --color-body: #666666;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-opensans: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white font-sans text-[15px] leading-relaxed text-body antialiased;
+    /* The reference site never scrolls sideways at any width. */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans text-ink;
+    text-wrap: balance;
+  }
+
+  img,
+  svg,
+  video {
+    @apply max-w-full;
+  }
+}
+
+@layer components {
+  /*
+   * Fluid page container.
+   *
+   * This replaces a hard `max-width: 1280px`, which left ~320px of dead space
+   * per side at 1920px and ~640px at 2560px. The width is now driven by a
+   * clamped gutter so the layout grows with the viewport, with a high cap that
+   * only engages on ultrawide displays to stop sections becoming sparse.
+   *
+   * Gutter: 16px at 375px -> ~51px at 1280px -> 77px at 1920px -> 80px capped.
+   */
+  .shell {
+    width: 100%;
+    max-width: 2200px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 5rem);
+  }
+
+  /*
+   * Document-style pages (articles, legal text, forms, confirmations) keep a
+   * comfortable reading measure instead of spanning the full fluid width.
+   * This is the one place a max-width is a deliberate design decision.
+   */
+  .shell-narrow {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 5rem);
+  }
+
+  /* Caps line length for long prose inside an otherwise full-width section. */
+  .measure {
+    max-width: 78ch;
+  }
+
+  .measure-center {
+    max-width: 78ch;
+    margin-inline: auto;
+  }
+
+  /*
+   * Card grids that gain columns as space allows, rather than stopping at a
+   * fixed `lg:grid-cols-4`. `min(100%, Npx)` keeps a single column from
+   * overflowing on narrow phones.
+   */
+  .cards-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .cards-grid-wide {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 21rem), 1fr));
+  }
+
+  .cards-grid-tight {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  }
+
+  /*
+   * Tailwind v4's @apply only accepts real utilities, not other custom classes,
+   * so each variant repeats the shared button utilities rather than @apply-ing
+   * `.btn`. Markup can still use `.btn` on its own for an unstyled-fill button.
+   */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-brand bg-white px-5 py-2.5 text-sm font-semibold text-brand transition-colors duration-200 hover:bg-brand-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand;
+  }
+
+  /* Vertical rhythm scales with the viewport instead of stepping at breakpoints. */
+  .section {
+    padding-block: clamp(2.5rem, 4.5vw, 4.5rem);
+  }
+
+  /*
+   * Fluid type: ~24px at 375px, ~32px at 1440px, capped at 40px so headings
+   * don't balloon on ultrawide screens.
+   */
+  .section-title {
+    @apply font-bold tracking-tight text-ink;
+    font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2.5rem);
+    line-height: 1.2;
+  }
+
+  .section-sub {
+    @apply mt-2 text-body;
+    font-size: clamp(0.875rem, 0.82rem + 0.2vw, 1.0625rem);
+  }
+
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+
+  /*
+   * Sticky trust marquee, ported from the reference site's inline
+   * `.custom-trust-marquee` styles (HTML widget on the homepage).
+   */
+  .custom-trust-marquee {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    width: 100%;
+    height: 40px;
+    align-items: center;
+    overflow: hidden;
+    background-color: var(--color-brand);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+  }
+
+  .custom-trust-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 35s linear infinite;
+  }
+
+  .custom-trust-track:hover {
+    animation-play-state: paused;
+  }
+
+  .custom-trust-content {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .trust-item {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  .custom-trust-star {
+    width: 15px;
+    height: 15px;
+    margin: 0 25px;
+    flex-shrink: 0;
+    fill: var(--color-accent);
+  }
+
+  @keyframes marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .custom-trust-track {
+      animation: none;
+    }
+  }
+
+  /* Article body styling for blog post HTML rendered from the reference site. */
+  .prose-arova {
+    @apply text-[15px] leading-[1.75] text-body;
+  }
+
+  .prose-arova h2 {
+    @apply mb-3 mt-8 text-xl font-bold text-ink sm:text-2xl;
+  }
+
+  .prose-arova h3 {
+    @apply mb-2 mt-6 text-lg font-bold text-ink;
+  }
+
+  .prose-arova p {
+    @apply mb-4;
+  }
+
+  .prose-arova strong {
+    @apply font-semibold text-ink;
+  }
+
+  .prose-arova a {
+    @apply text-brand underline underline-offset-2 hover:text-brand-dark;
+  }
+
+  .prose-arova ul,
+  .prose-arova ol {
+    @apply mb-4 space-y-1.5 pl-5;
+  }
+
+  .prose-arova ul {
+    @apply list-disc;
+  }
+
+  .prose-arova ol {
+    @apply list-decimal;
+  }
+
+  .prose-arova img {
+    @apply my-6 rounded-xl;
+  }
+
+  .prose-arova blockquote {
+    @apply my-5 border-l-4 border-brand pl-4 italic;
+  }
+
+  /*
+   * Horizontal carousels: native scroll-snap, no JS, no overflow on the page.
+   * `items-stretch` + `h-full` on the item and its card keeps every card in a
+   * rail the same height, so the "Book Now" buttons line up across cards whose
+   * descriptions and bullet lists differ in length.
+   */
+  .rail {
+    @apply flex snap-x snap-mandatory items-stretch gap-4 overflow-x-auto pb-3;
+    scrollbar-width: thin;
+  }
+
+  .rail > * {
+    @apply h-auto shrink-0 snap-start self-stretch;
+  }
+
+  /* Cards stretch to their grid/flex row so their footers align. */
+  .card-stretch {
+    @apply flex h-full flex-col;
+  }
+}
+
+/* Utility for clamping the reference's truncated card descriptions. */
+@utility line-clamp-2-fixed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
