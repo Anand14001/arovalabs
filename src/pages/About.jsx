@@ -146,8 +146,8 @@ export default function About() {
         </div>
       </section>
 
-      {/* What Our Patients Say — no Google reviews widget on this page */}
-      <Testimonials showGoogleReviews={false} />
+      {/* What Our Patients Say — the verified Google reviews. */}
+      <Testimonials />
 
       {/* Our Locations */}
       <section className="section">

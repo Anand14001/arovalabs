@@ -1,10 +1,15 @@
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { newsletter } from '../data/site';
 
 /*
- * Sits in the teal footer, so the field is white and the submit button uses the
- * reference footer's own orange (#F48D06 in Elementor's post-339.css — note this
- * is a shade apart from the global accent #EF8A06).
+ * The footer signup.
+ *
+ * A pill with the submit folded inside it, rather than a boxed field with a
+ * block button beside it. One shape instead of two, and the submit sits where
+ * the cursor already is when it finishes typing. The button keeps the reference
+ * footer's own orange (#F48D06 in Elementor's post-339.css — a shade apart from
+ * the global accent #EF8A06) so the footer stays faithful to the original.
  *
  * The reference site posts this to Elementor Pro's form handler. There is no
  * backend here, so the field validates and the form reports success locally
@@ -16,11 +21,11 @@ export default function Newsletter() {
 
   return (
     <div>
-      <h2 className="text-base font-bold text-white">{newsletter.heading}</h2>
-      <p className="mt-4 text-sm text-white/80">{newsletter.sub}</p>
+      <h2 className="label text-white/45">{newsletter.heading}</h2>
+      <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-white/75">{newsletter.sub}</p>
 
       <form
-        className="mt-4"
+        className="mt-6"
         onSubmit={(e) => {
           e.preventDefault();
           setSent(true);
@@ -30,7 +35,8 @@ export default function Newsletter() {
         <label htmlFor="newsletter-email" className="sr-only">
           {newsletter.placeholder}
         </label>
-        <div className="flex flex-col gap-2 sm:flex-row">
+
+        <div className="flex max-w-sm items-center gap-2 rounded-full bg-white p-1.5 pl-5 focus-within:ring-2 focus-within:ring-white/60">
           <input
             id="newsletter-email"
             type="email"
@@ -42,18 +48,23 @@ export default function Newsletter() {
               setSent(false);
             }}
             placeholder={newsletter.placeholder}
-            className="w-full min-w-0 rounded-lg border border-white/30 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate-400 focus:border-white focus:outline-none"
+            className="w-full min-w-0 bg-transparent text-sm text-ink outline-none placeholder:text-ink/35"
           />
+
           <button
             type="submit"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#F48D06] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#d87e05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            aria-label={newsletter.button}
+            className="group grid size-10 shrink-0 place-items-center rounded-full bg-[#F48D06] text-white transition-colors duration-300 hover:bg-[#d87e05]"
           >
-            {newsletter.button}
+            <ArrowRight
+              size={17}
+              className="transition-transform duration-300 group-hover:translate-x-0.5"
+            />
           </button>
         </div>
 
         {sent && (
-          <p className="mt-2 text-xs text-white" role="status">
+          <p className="mt-3 text-xs text-white" role="status">
             Thanks for subscribing. (Demo only — no backend is connected.)
           </p>
         )}

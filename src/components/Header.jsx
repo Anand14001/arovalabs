@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, Phone, Search, ShoppingBag, User, X } from 'lucide-react';
-import { contact, mainNav, searchPlaceholder, site } from '../data/site';
+import { useLenis } from 'lenis/react';
+import { ArrowUpRight, Menu, Phone, Search, ShoppingBag, User, X } from 'lucide-react';
+import { contact, mainNav, site } from '../data/site';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../data/products';
 import LoginPopup from './LoginPopup';
@@ -15,228 +16,258 @@ function WhatsAppIcon({ className }) {
   );
 }
 
+/*
+ * Site header.
+ *
+ * The previous version was two separate bars, and only the lower one was
+ * sticky — so the moment you scrolled, the logo scrolled away with the top bar
+ * and the pinned bar was left with no brand on it at all. It also carried two
+ * search affordances (an inline form upstairs, an icon downstairs) and put the
+ * nav in a row with nothing on its left, which left it floating.
+ *
+ * This is one sticky element with two tiers inside it:
+ *
+ *   Utility tier — the contact routes (home collection number, phone,
+ *     WhatsApp). Real content for a diagnostics lab, but not what you need in
+ *     hand at all times, so it collapses to nothing on scroll.
+ *
+ *   Primary tier — logo, navigation, search, account, cart, sign-in. Always
+ *     present, always sticky, and it tightens slightly once the page moves.
+ *
+ * The result keeps every piece of content the old header carried, shows the
+ * brand at every scroll position, and gives back roughly 60px of vertical space
+ * once you start reading.
+ */
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { count, total } = useCart();
   const { pathname } = useLocation();
+  const lenis = useLenis();
 
   // Close the off-canvas nav whenever the route changes.
   useEffect(() => setMobileOpen(false), [pathname]);
 
-  // Lock body scroll behind the off-canvas nav.
+  /*
+   * Lock scrolling behind the off-canvas nav. Lenis has to be stopped
+   * explicitly — it listens on the window, so hiding body overflow alone
+   * leaves it free to keep driving the scroll position underneath the panel.
+   */
   useEffect(() => {
+    if (mobileOpen) lenis?.stop();
+    else lenis?.start();
+
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
+      lenis?.start();
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, lenis]);
 
-  const navLinkClass = ({ isActive }) =>
-    [
-      'relative py-2 text-sm font-semibold transition-colors',
-      isActive ? 'text-brand' : 'text-ink hover:text-brand',
-    ].join(' ');
+  // Collapse the utility tier once the page has moved off the top.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
     <>
       <a
         href="#content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-brand focus:px-4 focus:py-2 focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
         Skip to content
       </a>
 
-      {/* ---------- Top bar (desktop only on the reference site) ---------- */}
-      <div className="hidden border-b border-slate-200 bg-white lg:block">
-        <div className="shell flex items-center justify-between gap-6 py-3">
-          <Link to="/" className="shrink-0">
-            <img src={site.logo} alt={site.title} className="h-11 w-auto" />
-          </Link>
-
-          <form
-            role="search"
-            onSubmit={(e) => e.preventDefault()}
-            className="flex max-w-md flex-1 items-center"
-          >
-            <label htmlFor="topbar-search" className="sr-only">
-              Search
-            </label>
-            <div className="flex w-full items-center rounded-lg border border-slate-300 bg-white focus-within:border-brand">
-              <input
-                id="topbar-search"
-                type="search"
-                name="s"
-                placeholder={searchPlaceholder}
-                className="w-full rounded-l-lg px-4 py-2 text-sm outline-none"
-              />
-              <button
-                type="submit"
-                aria-label="Search"
-                className="rounded-r-lg px-3 py-2 text-brand hover:text-brand-dark"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </form>
-
-          <div className="flex items-center gap-3">
+      <header
+        className={`sticky top-0 z-40 bg-white/85 backdrop-blur-md transition-shadow duration-300 ${
+          scrolled ? 'shadow-[0_1px_0_0_rgb(24_21_17/0.1),0_8px_24px_-18px_rgb(24_21_17/0.3)]' : 'shadow-[0_1px_0_0_rgb(24_21_17/0.08)]'
+        }`}
+      >
+        {/* ------------------------------------------------ utility tier */}
+        <div
+          className={`hidden overflow-hidden transition-[height,opacity] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:block ${
+            scrolled ? 'h-0 opacity-0' : 'h-11 opacity-100'
+          }`}
+        >
+          <div className="shell flex h-11 items-center justify-between gap-6">
             <a
-              href={`tel:${contact.headerTel}`}
-              aria-label="Call Arova Labs"
-              className="grid size-9 place-items-center rounded-full bg-brand-light text-brand transition-colors hover:bg-brand hover:text-white"
+              href={`tel:${contact.homeCollection.tel}`}
+              className="group flex items-center gap-2.5 text-[13px]"
             >
-              <Phone size={17} />
-            </a>
-            <a
-              href={contact.whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Chat on WhatsApp"
-              className="grid size-9 place-items-center rounded-full bg-[#e8f7ee] text-[#25D366] transition-colors hover:bg-[#25D366] hover:text-white"
-            >
-              <WhatsAppIcon className="size-[18px]" />
-            </a>
-
-            <a href={`tel:${contact.homeCollection.tel}`} className="flex items-center gap-2">
-              <img
-                src="/assets/ChatGPT_Image_Mar_24__2026__07_20_19_AM-removebg-preview.webp"
-                alt=""
-                className="h-10 w-auto"
-              />
-              <span className="leading-tight">
-                <span className="block text-xs font-semibold text-ink">Home Collection</span>
-                <span className="block text-sm font-bold text-brand">
-                  {contact.homeCollection.label}
-                </span>
+              <span className="grid size-6 place-items-center rounded-full bg-accent-light text-accent">
+                <Phone size={12} strokeWidth={2.4} />
+              </span>
+              <span className="text-body">Home Collection</span>
+              <span className="font-semibold text-ink transition-colors group-hover:text-brand">
+                {contact.homeCollection.label}
               </span>
             </a>
+
+            <div className="flex items-center gap-5">
+              <a
+                href={`tel:${contact.headerTel}`}
+                className="flex items-center gap-2 text-[13px] text-body transition-colors hover:text-brand"
+              >
+                <Phone size={14} />
+                {contact.headerTel}
+              </a>
+              <span className="h-3.5 w-px bg-ink/15" aria-hidden="true" />
+              <a
+                href={contact.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 text-[13px] text-body transition-colors hover:text-[#25D366]"
+              >
+                <WhatsAppIcon className="size-3.5" />
+                WhatsApp
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ---------- Main header ---------- */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="shell flex items-center justify-between gap-4 py-3">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={mobileOpen}
-              className="grid size-10 place-items-center rounded-lg text-ink hover:bg-slate-100 lg:hidden"
-            >
-              <Menu size={22} />
-            </button>
-            <Link to="/" className="shrink-0 lg:hidden">
-              <img src={site.logo} alt={site.title} className="h-9 w-auto" />
-            </Link>
-          </div>
+        {/* ------------------------------------------------ primary tier */}
+        <div
+          className={`shell flex items-center justify-between gap-4 transition-[padding] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            scrolled ? 'py-2.5' : 'py-3.5'
+          }`}
+        >
+          {/* Brand — now inside the sticky tier, so it never scrolls away. */}
+          <Link to="/" className="shrink-0" aria-label={site.title}>
+            <img
+              src={site.logo}
+              alt={site.title}
+              className={`w-auto transition-[height] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                scrolled ? 'h-9' : 'h-10 sm:h-11'
+              }`}
+            />
+          </Link>
 
-          <nav aria-label="Main" className="hidden items-center gap-8 lg:flex">
+          <nav aria-label="Main" className="hidden items-center gap-9 lg:flex">
             {mainNav.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === '/'} className={navLinkClass}>
-                {item.label}
-              </NavLink>
+              <NavItem key={item.to} item={item} />
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="Open search"
-              className="grid size-10 place-items-center rounded-lg text-ink hover:bg-slate-100"
-            >
-              <Search size={20} />
-            </button>
+          <div className="flex items-center gap-1 sm:gap-1.5">
+            <IconButton label="Open search" onClick={() => setSearchOpen(true)}>
+              <Search size={19} />
+            </IconButton>
 
-            <Link
-              to="/my-account/"
-              aria-label="My account"
-              className="grid size-10 place-items-center rounded-lg text-ink hover:bg-slate-100"
-            >
-              <User size={20} />
-            </Link>
+            <IconButton as={Link} to="/my-account/" label="My account" className="hidden sm:grid">
+              <User size={19} />
+            </IconButton>
 
+            {/* Cart carries its value, not just a count — it is the one control
+                here whose state the visitor is actively tracking. */}
             <Link
               to="/cart/"
-              className="flex items-center gap-2 rounded-lg px-2 py-2 text-ink hover:bg-slate-100"
+              className="group flex items-center gap-2.5 rounded-full py-1.5 pl-2 pr-1.5 transition-colors hover:bg-brand-light/60 sm:pr-3"
             >
-              <span className="relative">
-                <ShoppingBag size={20} />
+              <span className="relative text-ink">
+                <ShoppingBag size={19} />
                 {count > 0 && (
-                  <span className="absolute -right-2 -top-2 grid size-4 place-items-center rounded-full bg-accent text-[10px] font-bold text-white">
+                  <span className="absolute -right-1.5 -top-1.5 grid size-4 place-items-center rounded-full bg-accent text-[10px] font-bold tabular-nums text-white">
                     {count}
                   </span>
                 )}
               </span>
-              <span className="hidden text-xs font-semibold sm:inline">
-                {formatPrice(total)} {count} Cart
+              <span className="hidden text-[13px] font-semibold tabular-nums text-ink sm:inline">
+                {formatPrice(total)}
               </span>
             </Link>
 
             <button
               type="button"
               onClick={() => setLoginOpen(true)}
-              className="btn-brand hidden lg:inline-flex"
+              className="btn-brand group ml-1.5 hidden !px-5 !py-2.5 text-[13px] lg:inline-flex"
             >
               Login &amp; Sign Up
+              <ArrowUpRight
+                size={15}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav"
+              className="ml-1 grid size-10 place-items-center rounded-full text-ink transition-colors hover:bg-brand-light/60 lg:hidden"
+            >
+              <Menu size={21} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* ---------- Mobile off-canvas nav ---------- */}
+      {/* ------------------------------------------------ mobile panel */}
       <div
         className={`fixed inset-0 z-50 lg:hidden ${mobileOpen ? '' : 'pointer-events-none'}`}
         aria-hidden={!mobileOpen}
       >
         <div
           onClick={() => setMobileOpen(false)}
-          className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-ink/40 backdrop-blur-[2px] transition-opacity duration-400 ${
             mobileOpen ? 'opacity-100' : 'opacity-0'
           }`}
         />
+
         <aside
           id="mobile-nav"
-          className={`absolute inset-y-0 left-0 flex w-[82%] max-w-xs flex-col bg-white shadow-xl transition-transform duration-300 ${
-            mobileOpen ? 'translate-x-0' : '-translate-x-full'
+          className={`absolute inset-y-0 right-0 flex w-[90%] max-w-sm flex-col bg-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            mobileOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-            <Link to="/" onClick={() => setMobileOpen(false)}>
+          <div className="flex items-center justify-between px-5 py-4">
+            <Link to="/" onClick={() => setMobileOpen(false)} aria-label={site.title}>
               <img src={site.logo} alt={site.title} className="h-9 w-auto" />
             </Link>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               aria-label="Close menu"
-              className="grid size-9 place-items-center rounded-lg hover:bg-slate-100"
+              className="grid size-10 place-items-center rounded-full text-ink transition-colors hover:bg-brand-light/60"
             >
               <X size={20} />
             </button>
           </div>
 
-          <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-2 py-3">
-            {mainNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) =>
-                  `block rounded-lg px-3 py-3 text-sm font-semibold ${
-                    isActive ? 'bg-brand-light text-brand' : 'text-ink hover:bg-slate-50'
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
+          {/*
+            Navigation at display size with a number against each item — the
+            same index pattern the page uses for its own sections, so the menu
+            reads as part of the site rather than as a stock drawer.
+          */}
+          <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-5 py-2">
+            <ul className="border-t border-ink/10">
+              {mainNav.map((item, i) => (
+                <li key={item.to} className="border-b border-ink/10">
+                  <NavLink
+                    to={item.to}
+                    end={item.to === '/'}
+                    className={({ isActive }) =>
+                      `flex items-center gap-4 py-4 transition-colors ${
+                        isActive ? 'text-brand' : 'text-ink'
+                      }`
+                    }
+                  >
+                    <span className="label text-ink/25">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="display-md flex-1">{item.label}</span>
+                    <ArrowUpRight size={18} aria-hidden="true" className="shrink-0 text-ink/25" />
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
           </nav>
 
-          <div className="space-y-3 border-t border-slate-200 p-4">
+          <div className="space-y-4 border-t border-ink/10 p-5">
             <button
               type="button"
               onClick={() => {
@@ -247,11 +278,32 @@ export default function Header() {
             >
               Login &amp; Sign Up
             </button>
+
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href={`tel:${contact.headerTel}`}
+                className="btn-outline !px-3 !py-2.5 text-[13px]"
+              >
+                <Phone size={15} />
+                Call
+              </a>
+              <a
+                href={contact.whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-outline !px-3 !py-2.5 text-[13px]"
+              >
+                <WhatsAppIcon className="size-4" />
+                WhatsApp
+              </a>
+            </div>
+
             <a
               href={`tel:${contact.homeCollection.tel}`}
-              className="flex items-center justify-center gap-2 text-sm font-semibold text-brand"
+              className="flex items-center justify-center gap-2 text-[13px] text-body"
             >
-              <Phone size={15} /> {contact.homeCollection.label}
+              Home Collection
+              <span className="font-semibold text-brand">{contact.homeCollection.label}</span>
             </a>
           </div>
         </aside>
@@ -260,5 +312,48 @@ export default function Header() {
       <SearchPopup open={searchOpen} onClose={() => setSearchOpen(false)} />
       <LoginPopup open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
+  );
+}
+
+/*
+ * A nav item with its own active marker: a 2px accent rule under the label,
+ * scaled in from the centre. A background chip would fight the hairline
+ * language the rest of the page is built from.
+ */
+function NavItem({ item }) {
+  return (
+    <NavLink to={item.to} end={item.to === '/'} className="group relative py-1">
+      {({ isActive }) => (
+        <>
+          <span
+            className={`text-[13.5px] font-semibold tracking-tight transition-colors duration-200 ${
+              isActive ? 'text-brand' : 'text-ink/70 group-hover:text-ink'
+            }`}
+          >
+            {item.label}
+          </span>
+          <span
+            aria-hidden="true"
+            className={`absolute -bottom-1 left-0 block h-[2px] w-full origin-center rounded-full bg-accent transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+            }`}
+          />
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+/* Circular icon control — one shape for every icon-only action in the bar. */
+function IconButton({ as: Tag = 'button', label, children, className = '', ...rest }) {
+  return (
+    <Tag
+      {...(Tag === 'button' ? { type: 'button' } : {})}
+      aria-label={label}
+      className={`grid size-10 place-items-center rounded-full text-ink transition-colors hover:bg-brand-light/60 ${className}`}
+      {...rest}
+    >
+      {children}
+    </Tag>
   );
 }

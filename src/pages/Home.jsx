@@ -1,13 +1,11 @@
 import Hero from '../components/Hero';
-import TrustMarquee from '../components/TrustMarquee';
 import QuickActions from '../components/QuickActions';
-import HomeCollection from '../components/HomeCollection';
-import ProductCarousel from '../components/ProductCarousel';
-import SectionHeading from '../components/SectionHeading';
-import OrganCategories from '../components/OrganCategories';
-import CertificationSection from '../components/CertificationSection';
-import WhatsAppReports from '../components/WhatsAppReports';
 import Statistics from '../components/Statistics';
+import ProductShowcase from '../components/ProductShowcase';
+import OrganCategories from '../components/OrganCategories';
+import HomeCollection from '../components/HomeCollection';
+import WhatsAppReports from '../components/WhatsAppReports';
+import CertificationSection from '../components/CertificationSection';
 import VideoSection from '../components/VideoSection';
 import Testimonials from '../components/Testimonials';
 import BlogSection from '../components/BlogSection';
@@ -20,96 +18,104 @@ import {
 } from '../data/products';
 
 /*
- * Homepage — sections in exactly the order the reference site renders them.
+ * Homepage.
  *
- * Two of the reference page's containers are display:none at every breakpoint
- * (they carry elementor-hidden-desktop + -tablet + -mobile) and so never reach
- * a visitor. They are deliberately not rendered here, and their content is kept
- * in data/homepage.js as `hiddenHeroSlides` and `hiddenHealthCheckups`:
- *   - the "Expert Care, Right at Your Door" text + CTA carousel (id ab3e523)
- *   - the "Recommended / Health Checkups" banners (id 45c6045)
+ * Every string, image and colour here is the reference site's. What changed is
+ * the architecture, because the reference page is fifteen sections of one
+ * shape — centred heading, grid of white cards, repeat — and a visitor stops
+ * reading a page that never changes its mind.
+ *
+ * Three things carry the redesign:
+ *
+ *   Typography. Headlines are a display serif against Inter for everything
+ *   functional, and the big numbers are typeset rather than boxed. That pairing
+ *   does most of the work of making the page feel considered instead of
+ *   assembled.
+ *
+ *   Varied structure. Every section now has a shape its content argues for: the
+ *   booking actions are an index of rows, the process is a sticky stack, the
+ *   accreditation is an editorial spread, the videos are a bento grid, the
+ *   journal is a list. No two consecutive sections share a layout.
+ *
+ *   Scroll. Lenis drives the whole page, and two sections use it for real
+ *   rather than decoratively — the product runs pin and travel sideways, and
+ *   the collection steps stack as you pass them. Both fall back to ordinary
+ *   layouts on narrow screens and under `prefers-reduced-motion`.
+ *
+ * The sequence is four movements:
+ *
+ *   1. Act now   hero, the booking index, the trust ribbon, the numbers.
+ *   2. Shop      tests → by organ → packages, with the organ navigator between
+ *                the two runs so the page is never two carousels in a row.
+ *   3. Reassure  collection, reports, accreditation — the objections, in the
+ *                order they occur to someone who has just seen a price.
+ *   4. Prove     prescriptions, the lab, patients, the journal, what's left.
+ *
+ * Section labels carry a running index (01…12): it costs no copy and gives a
+ * page this long a visible spine.
+ *
+ * Two of the reference page's containers carry elementor-hidden-desktop,
+ * -tablet AND -mobile, so they are display:none at every breakpoint and never
+ * reach a visitor. They stay unrendered, with their content kept in
+ * data/homepage.js as `hiddenHeroSlides` and `hiddenHealthCheckups`.
  * See AUDIT.md §2 and §3.
  */
 export default function Home() {
   return (
     <>
-      {/* 1. Hero image carousel */}
+      {/* ---------------------------------------------- 1. act now --------- */}
+
       <Hero />
-
-      {/* 2. Sticky trust marquee */}
-      <TrustMarquee />
-
-      {/* 3. Book on WhatsApp / Book via Call / Upload Prescription */}
       <QuickActions />
-
-      {/* 4. Home Collection */}
-      <HomeCollection />
-
-      {/* 5. Frequently Booked Tests */}
-      <section className="section">
-        <div className="shell">
-          <SectionHeading
-            heading={carouselSections.frequentTests.heading}
-            sub={carouselSections.frequentTests.sub}
-            viewMore={carouselSections.frequentTests.viewMore}
-          />
-          <div className="mt-8">
-            <ProductCarousel products={frequentlyBookedTests} variant="test" />
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Choose Test by Organ */}
-      <OrganCategories />
-
-      {/* 7. Frequently Booked Packages */}
-      <section className="section bg-slate-50">
-        <div className="shell">
-          <SectionHeading
-            heading={carouselSections.frequentPackages.heading}
-            sub={carouselSections.frequentPackages.sub}
-            viewMore={carouselSections.frequentPackages.viewMore}
-          />
-          <div className="mt-8">
-            <ProductCarousel products={frequentlyBookedPackages} variant="package" />
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Certified Quality Assurance */}
-      <CertificationSection />
-
-      {/* 9. Most Prescribed Tests */}
-      <section className="section">
-        <div className="shell">
-          <SectionHeading
-            heading={carouselSections.prescribedTests.heading}
-            sub={carouselSections.prescribedTests.sub}
-            viewMore={carouselSections.prescribedTests.viewMore}
-          />
-          <div className="mt-8">
-            <ProductCarousel products={mostPrescribedTests} variant="test" />
-          </div>
-        </div>
-      </section>
-
-      {/* 10. WhatsApp Reports */}
-      <WhatsAppReports />
-
-      {/* 11. Why Choose Arova labs? + Awards Won */}
       <Statistics />
 
-      {/* 12. See Arova in Action */}
+      {/* ------------------------------------------------- 2. shop --------- */}
+
+      <ProductShowcase
+        index="02"
+        eyebrow="Popular tests"
+        heading={carouselSections.frequentTests.heading}
+        sub={carouselSections.frequentTests.sub}
+        viewMore={carouselSections.frequentTests.viewMore}
+        products={frequentlyBookedTests}
+        variant="test"
+      />
+
+      <OrganCategories />
+
+      <ProductShowcase
+        index="04"
+        eyebrow="Health packages"
+        heading={carouselSections.frequentPackages.heading}
+        sub={carouselSections.frequentPackages.sub}
+        viewMore={carouselSections.frequentPackages.viewMore}
+        products={frequentlyBookedPackages}
+        variant="package"
+      />
+
+      {/* --------------------------------------------- 3. reassure --------- */}
+
+      <HomeCollection />
+      <WhatsAppReports />
+      <CertificationSection />
+
+      {/* ------------------------------------------------ 4. prove --------- */}
+
+      <ProductShowcase
+        index="08"
+        eyebrow="Doctor recommended"
+        heading={carouselSections.prescribedTests.heading}
+        sub={carouselSections.prescribedTests.sub}
+        viewMore={carouselSections.prescribedTests.viewMore}
+        products={mostPrescribedTests}
+        variant="test"
+      />
+
       <VideoSection />
-
-      {/* 13. What Our Patients Say */}
-      <Testimonials />
-
-      {/* 14. Latest Health Blogs */}
+      <Testimonials index="10" eyebrow="Patient voices" />
       <BlogSection />
 
-      {/* 15. FAQ */}
-      <FAQ items={homeFaqs} heading="FAQ" />
+      <FAQ index="12" eyebrow="Good to know" items={homeFaqs} heading="FAQ" />
     </>
   );
 }
