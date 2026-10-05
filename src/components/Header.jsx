@@ -6,7 +6,7 @@ import { contact, mainNav, site } from '../data/site';
 import { useCart } from '../context/CartContext';
 import { formatPrice } from '../data/products';
 import LoginPopup from './LoginPopup';
-import SearchPopup from './SearchPopup';
+import SearchOverlay from './search/SearchOverlay';
 
 function WhatsAppIcon({ className }) {
   return (
@@ -309,7 +309,7 @@ export default function Header() {
         </aside>
       </div>
 
-      <SearchPopup open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
       <LoginPopup open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
