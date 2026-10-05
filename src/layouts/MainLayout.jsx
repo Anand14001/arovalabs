@@ -4,14 +4,11 @@ import { useLenis } from 'lenis/react';
 import Header from '../components/Header';
 import TrustRibbon from '../components/TrustRibbon';
 import Footer from '../components/Footer';
-import FloatingCart from '../components/FloatingCart';
 import ScrollProgress from '../components/ScrollProgress';
-import { useCart } from '../context/CartContext';
 
-// Shared chrome for every page: header, footer and the floating cart widget.
+// Shared chrome for every page: trust ribbon, header, footer.
 export default function MainLayout() {
   const { pathname } = useLocation();
-  const { count } = useCart();
   // Undefined when smooth scrolling is off (reduced-motion), so guard the call.
   const lenis = useLenis();
 
@@ -33,13 +30,11 @@ export default function MainLayout() {
       <TrustRibbon />
       <Header />
 
-      {/* Bottom padding only when the fixed cart bar is actually on screen. */}
-      <main id="content" className={`flex-1 ${count > 0 ? 'pb-24' : ''}`}>
+      <main id="content" className="flex-1">
         <Outlet />
       </main>
 
       <Footer />
-      <FloatingCart />
     </div>
   );
 }

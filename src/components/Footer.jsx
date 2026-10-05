@@ -32,7 +32,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="band-brand mt-4">
+    <footer className="band-brand">
       <div className="shell pb-10 pt-16 sm:pt-20">
         {/* ------------------------------------------------- 1. sign-off */}
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">

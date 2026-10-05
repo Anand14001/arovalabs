@@ -1,118 +1,182 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { ArrowLeft, Undo2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
 import { emptyCart } from '../data/pages';
+import CartItem from '../components/cart/CartItem';
+import OrderSummary from '../components/cart/OrderSummary';
+import EmptyCart from '../components/cart/EmptyCart';
+import CartRecommendations from '../components/cart/CartRecommendations';
+import Reveal from '../components/motion/Reveal';
 
 /*
- * /cart/ — the reference site could only be observed in its empty state, so the
- * empty view is exact and the populated view follows the WooCommerce default
- * layout (AUDIT.md §4).
+ * /cart/
+ *
+ * Rebuilt around what a diagnostics cart is actually for. The reference site
+ * ships the WooCommerce default — a bordered table of rows and a "Cart totals"
+ * box — which answers "what is in here" but not "what am I paying and what do I
+ * do next".
+ *
+ * The page is now a two-column booking review: the selection on the left as
+ * hairline-separated entries with their line totals in a single column, and a
+ * sticky summary on the right carrying the arithmetic, the payable total and
+ * the one action. Below it, a quiet set of frequently booked tests — secondary
+ * by construction, because the job here is to finish the booking already
+ * started.
+ *
+ * On state, honestly: the cart is React state mirrored into localStorage and
+ * read synchronously, so there is no asynchronous fetch and therefore no
+ * loading skeleton to design — inventing one would be theatre. What is real is
+ * covered: removal animates out, quantity changes flash the total, a removal
+ * can be undone, and an empty cart gets its own composition.
+ *
+ * Nothing about the cart logic changed. `addItem`, `removeItem`, `setQuantity`,
+ * the totals and the localStorage persistence are untouched; this page only
+ * presents them.
  */
 export default function Cart() {
-  const { items, total, setQuantity, removeItem } = useCart();
+  const { items, count, total, setQuantity, removeItem, addItem } = useCart();
+  const reduced = useReducedMotion();
+
+  // Holds the last removed line so it can be put back. A removal is the one
+  // destructive action here, and undo is cheaper than a confirm dialog.
+  const [undoable, setUndoable] = useState(null);
+  const undoTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(undoTimer.current), []);
+
+  const handleRemove = useCallback(
+    (item) => {
+      removeItem(item.id);
+      setUndoable({ id: item.id, quantity: item.quantity, title: item.product.title });
+
+      clearTimeout(undoTimer.current);
+      undoTimer.current = setTimeout(() => setUndoable(null), 7000);
+    },
+    [removeItem],
+  );
+
+  const undo = useCallback(() => {
+    if (!undoable) return;
+    addItem(undoable.id, undoable.quantity);
+    clearTimeout(undoTimer.current);
+    setUndoable(null);
+  }, [undoable, addItem]);
+
+  // Both figures are derived from prices the products already carry, so the
+  // payable total stays exactly what the cart context computes.
+  const itemsTotal = items.reduce((sum, i) => sum + i.product.regularPrice * i.quantity, 0);
+  const savings = itemsTotal - total;
+
+  if (items.length === 0) {
+    return (
+      <>
+        <EmptyCart />
+
+        {/* The undo bar outlives the last item, so a cart emptied by accident
+            is still recoverable. */}
+        <UndoBar undoable={undoable} onUndo={undo} reduced={reduced} className="pb-16" />
+      </>
+    );
+  }
 
   return (
-    <section className="section">
-      <div className="shell">
-        <h1 className="text-2xl font-bold text-ink sm:text-3xl">Cart</h1>
+    <>
+      <section className="section">
+        <div className="shell">
+          <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
+            <div>
+              <p className="label mb-5 text-ink/35">
+                <span className="label-num">{String(count).padStart(2, '0')}</span>
+                {count === 1 ? 'item selected' : 'items selected'}
+              </p>
+              <h1 className="display-lg">Your booking</h1>
+            </div>
 
-        {items.length === 0 ? (
-          <div className="mt-6 card p-6 text-center sm:p-10">
-            <p className="text-sm text-body">{emptyCart.message}</p>
-            <Link to={emptyCart.returnTo} className="btn-brand mt-5">
+            <Link to={emptyCart.returnTo} className="link-arrow shrink-0">
+              <ArrowLeft size={16} aria-hidden="true" />
               {emptyCart.returnLabel}
             </Link>
+          </Reveal>
+
+          <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
+            {/* ------------------------------------------- the selection */}
+            <div>
+              <ul className="border-t border-ink/10">
+                <AnimatePresence initial={false}>
+                  {items.map((item) => (
+                    <motion.li
+                      key={item.id}
+                      layout={!reduced}
+                      /*
+                       * Collapsing height on exit is what stops the rows below
+                       * snapping up the instant something is removed.
+                       */
+                      initial={reduced ? false : { opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={reduced ? undefined : { opacity: 0, height: 0 }}
+                      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden border-b border-ink/10"
+                    >
+                      <CartItem item={item} onQuantity={setQuantity} onRemove={handleRemove} />
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+
+              <UndoBar undoable={undoable} onUndo={undo} reduced={reduced} className="mt-6" />
+            </div>
+
+            {/* --------------------------------------------- the summary */}
+            <Reveal y={18} delay={0.06}>
+              <OrderSummary
+                itemsTotal={itemsTotal}
+                savings={savings}
+                total={total}
+                count={count}
+              />
+            </Reveal>
           </div>
-        ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-            <ul className="space-y-4">
-              {items.map(({ id, quantity, product }) => (
-                <li key={id} className="card flex gap-4 p-4">
-                  <Link to={`/product/${product.slug}/`} className="shrink-0">
-                    <img
-                      src={product.archiveImage}
-                      alt=""
-                      className="size-20 rounded-lg object-cover"
-                    />
-                  </Link>
+        </div>
+      </section>
 
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-sm font-bold text-ink">
-                      <Link to={`/product/${product.slug}/`} className="hover:text-brand">
-                        {product.title}
-                      </Link>
-                    </h2>
+      <CartRecommendations />
+    </>
+  );
+}
 
-                    <p className="mt-1 text-sm text-body">
-                      {formatPrice(product.salePrice)}{' '}
-                      <span className="text-xs text-slate-400 line-through">
-                        {formatPrice(product.regularPrice)}
-                      </span>
-                    </p>
+/*
+ * Undo affordance for the last removal. A polite live region, so the removal is
+ * announced once rather than the whole list being re-read.
+ */
+function UndoBar({ undoable, onUndo, reduced, className = '' }) {
+  return (
+    <div aria-live="polite" className={className}>
+      <AnimatePresence>
+        {undoable && (
+          <motion.div
+            initial={reduced ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduced ? undefined : { opacity: 0, y: 8 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="shell flex flex-wrap items-center justify-between gap-4 rounded-xl bg-brand-light px-5 py-3.5"
+          >
+            <p className="text-[13px] text-brand">
+              Removed <span className="font-semibold">{undoable.title}</span>
+            </p>
 
-                    <div className="mt-3 flex items-center gap-3">
-                      <div className="flex items-center rounded-lg border border-slate-300">
-                        <button
-                          type="button"
-                          onClick={() => setQuantity(id, quantity - 1)}
-                          aria-label={`Decrease quantity of ${product.title}`}
-                          className="px-2.5 py-1.5 text-ink hover:text-brand"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="min-w-8 text-center text-sm font-semibold">
-                          {quantity}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setQuantity(id, quantity + 1)}
-                          aria-label={`Increase quantity of ${product.title}`}
-                          className="px-2.5 py-1.5 text-ink hover:text-brand"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => removeItem(id)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 size={14} /> Remove
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="shrink-0 text-sm font-bold text-ink">
-                    {formatPrice(product.salePrice * quantity)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-
-            <aside className="card h-fit p-5 lg:sticky lg:top-24">
-              <h2 className="text-base font-bold text-ink">Cart totals</h2>
-
-              <dl className="mt-4 space-y-2 border-b border-slate-100 pb-4 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-body">Subtotal</dt>
-                  <dd className="font-semibold text-ink">{formatPrice(total)}</dd>
-                </div>
-              </dl>
-
-              <div className="mt-4 flex justify-between text-base font-bold text-ink">
-                <span>Total</span>
-                <span>{formatPrice(total)}</span>
-              </div>
-
-              <Link to="/checkout/" className="btn-brand mt-5 w-full">
-                Proceed to checkout
-              </Link>
-            </aside>
-          </div>
+            <button
+              type="button"
+              onClick={onUndo}
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand underline underline-offset-2 transition-colors hover:text-brand-dark"
+            >
+              <Undo2 size={14} aria-hidden="true" />
+              Undo
+            </button>
+          </motion.div>
         )}
-      </div>
-    </section>
+      </AnimatePresence>
+    </div>
   );
 }
