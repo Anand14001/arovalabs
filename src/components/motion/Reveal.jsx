@@ -59,6 +59,18 @@ export function RevealGroup({
   as = 'div',
   stagger = 0.07,
   delay = 0,
+  /*
+   * `onMount` plays the stagger as soon as the group mounts instead of waiting
+   * for it to scroll into view.
+   *
+   * Use it for any set whose contents can change in place — a filtered results
+   * grid, say. Two reasons: a tall grid can fail the in-view threshold on first
+   * paint and sit at opacity 0 until the visitor happens to scroll, and if the
+   * group is re-keyed to replay the stagger while it is already on screen,
+   * `whileInView` may never re-fire and the new results never appear at all.
+   * Content that is merely decorative keeps the scroll trigger.
+   */
+  onMount = false,
   className = '',
   ...rest
 }) {
@@ -74,12 +86,15 @@ export function RevealGroup({
     );
   }
 
+  const trigger = onMount
+    ? { animate: 'shown' }
+    : { whileInView: 'shown', viewport: VIEWPORT };
+
   return (
     <Tag
       className={className}
       initial="hidden"
-      whileInView="shown"
-      viewport={VIEWPORT}
+      {...trigger}
       variants={{
         hidden: {},
         shown: { transition: { staggerChildren: stagger, delayChildren: delay } },
