@@ -49,7 +49,7 @@ export default function LocationsSection() {
       <div className="shell">
         <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           <div className="max-w-xl">
-            <p className="label mb-6 text-ink/35">
+            <p className="label-section mb-6 text-ink/35">
               <span className="label-num">{String(locations.length).padStart(2, '0')}</span>
               {locationsSection.sub}
             </p>

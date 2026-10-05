@@ -222,12 +222,36 @@
   }
 
   /*
-   * Labels. Wide tracking at small size — the quiet counterpoint that lets the
-   * headings stay as tight as they are.
+   * Labels — the small tracked line that sits above a section title, and the
+   * running numbers through the indexes.
+   *
+   * 15px, up from 11. A label sitting above a 3rem heading has to hold its own
+   * side of that pairing — at 11px it read as a caption stuck to the heading
+   * rather than the first line of it, and uppercase loses too much to tracking
+   * at small sizes to survive the comparison. Tracking eases back as the size
+   * climbs, because letter-spacing that reads as deliberate at 11px reads as
+   * loose at 15.
    */
   .label {
-    @apply inline-flex items-center gap-3 text-[11px] font-semibold uppercase;
-    letter-spacing: 0.16em;
+    @apply inline-flex items-center gap-3 text-[15px] font-semibold uppercase;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * The eyebrow that introduces a section heading — "01 Our Core Purpose".
+   *
+   * Its own size rather than a larger `.label`, because that class does two
+   * different jobs: this one, standing above a 3rem display heading where it
+   * has to hold its side of the pairing, and the running numbers inside list
+   * rows and meta lines, where 18px would be shouting. Two sizes, two jobs.
+   *
+   * Tracking eases back as the size climbs — letter-spacing that reads as
+   * deliberate at 13px reads as loose at 18.
+   */
+  .label-section {
+    @apply inline-flex items-center gap-3 text-lg font-semibold uppercase;
+    letter-spacing: 0.08em;
     font-variant-numeric: tabular-nums;
   }
 

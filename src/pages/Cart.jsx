@@ -87,7 +87,7 @@ export default function Cart() {
         <div className="shell">
           <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
             <div>
-              <p className="label mb-5 text-ink/35">
+              <p className="label-section mb-5 text-ink/35">
                 <span className="label-num">{String(count).padStart(2, '0')}</span>
                 {count === 1 ? 'item selected' : 'items selected'}
               </p>

@@ -25,7 +25,7 @@ export default function CertificationSection() {
       <div className="shell">
         {/* ------------------------------------------------- the heading */}
         <Reveal>
-          <p className="label mb-6 text-ink/35">
+          <p className="label-section mb-6 text-ink/35">
             <span className="label-num">07</span>
             Accreditation
           </p>

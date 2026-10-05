@@ -21,7 +21,7 @@ export default function Newsletter() {
 
   return (
     <div>
-      <h2 className="label text-white/45">{newsletter.heading}</h2>
+      <h2 className="label-section text-white/45">{newsletter.heading}</h2>
       <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-white/75">{newsletter.sub}</p>
 
       <form

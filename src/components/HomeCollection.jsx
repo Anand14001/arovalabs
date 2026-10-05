@@ -26,7 +26,7 @@ export default function HomeCollection() {
         <div className="lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-20">
           {/* ------------------------------------------------- the heading */}
           <Reveal className="lg:sticky lg:top-32 lg:self-start">
-            <p className="label mb-6 text-ink/35">
+            <p className="label-section mb-6 text-ink/35">
               <span className="label-num">05</span>
               How it works
             </p>

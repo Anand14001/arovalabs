@@ -283,7 +283,7 @@ function ShowcaseHeading({ index, eyebrow, heading, sub, viewMore, viewMoreLabel
     return (
       <Reveal className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
         <div>
-          <p className="label mb-3 text-ink/35">
+          <p className="label-section mb-3 text-ink/35">
             <span className="label-num">{index}</span>
             {eyebrow}
           </p>
@@ -306,7 +306,7 @@ function ShowcaseHeading({ index, eyebrow, heading, sub, viewMore, viewMoreLabel
   return (
     <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
       <div className="max-w-xl">
-        <p className="label mb-6 text-ink/35">
+        <p className="label-section mb-6 text-ink/35">
           <span className="label-num">{index}</span>
           {eyebrow}
         </p>

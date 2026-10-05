@@ -25,7 +25,7 @@ export default function WhatsAppReports() {
         <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-20">
           {/* ------------------------------------------------------- copy */}
           <Reveal>
-            <p className="label mb-6 text-ink/35">
+            <p className="label-section mb-6 text-ink/35">
               <span className="label-num">06</span>
               Digital reports
             </p>

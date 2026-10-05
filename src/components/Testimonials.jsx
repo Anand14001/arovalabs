@@ -27,22 +27,15 @@ export default function Testimonials({ index, eyebrow }) {
   return (
     <section className="section-lg rule-top">
       <div className="shell">
-        <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
-          <div className="max-w-xl">
-            {/* The running index belongs to the homepage's spine, so it's opt-in. */}
-            {(index || eyebrow) && (
-              <p className="label mb-6 text-ink/35">
-                {index && <span className="label-num">{index}</span>}
-                {eyebrow}
-              </p>
-            )}
-            <h2 className="display-lg">{testimonialsHeading}</h2>
-          </div>
-
-          <p className="label shrink-0 text-ink/30">
-            <span className="label-num">{googleReviews.length}</span>
-            Verified on Google
-          </p>
+        <Reveal className="max-w-xl">
+          {/* The running index belongs to the homepage's spine, so it's opt-in. */}
+          {(index || eyebrow) && (
+            <p className="label-section mb-6 text-ink/35">
+              {index && <span className="label-num">{index}</span>}
+              {eyebrow}
+            </p>
+          )}
+          <h2 className="display-lg">{testimonialsHeading}</h2>
         </Reveal>
       </div>
 

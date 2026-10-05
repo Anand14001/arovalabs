@@ -54,7 +54,7 @@ export default function Footer() {
         {/* ------------------------------------------------ 2. directory */}
         <div className="mt-16 grid gap-10 border-t border-white/15 pt-12 lg:grid-cols-12 lg:gap-16">
           <nav aria-label="Footer" className="lg:col-span-4">
-            <h2 className="label text-white/45">Quick Links</h2>
+            <h2 className="label-section text-white/45">Quick Links</h2>
             <ul className="mt-6 space-y-1">
               {footerQuickLinks.map((item) => (
                 <li key={item.to}>
@@ -76,7 +76,7 @@ export default function Footer() {
           </nav>
 
           <div className="lg:col-span-8">
-            <h2 className="label text-white/45">Get in Touch</h2>
+            <h2 className="label-section text-white/45">Get in Touch</h2>
 
             <ul className="mt-6 grid gap-x-10 gap-y-1 sm:grid-cols-2">
               {contact.footerPhones.map((p) => (

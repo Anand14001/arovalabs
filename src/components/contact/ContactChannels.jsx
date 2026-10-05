@@ -73,7 +73,7 @@ export default function ContactChannels() {
     <section className="section-lg rule-top">
       <div className="shell">
         <Reveal className="max-w-2xl">
-          <p className="label mb-6 text-ink/35">Reach out</p>
+          <p className="label-section mb-6 text-ink/35">Reach out</p>
           <h2 className="display-lg">{question}?</h2>
           <p className="section-sub max-w-lg">{rest.join('?').trim()}</p>
         </Reveal>

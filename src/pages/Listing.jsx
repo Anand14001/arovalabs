@@ -109,7 +109,7 @@ export default function Listing({ which }) {
             centring is on the column, not on a single shared width.
           */}
           <Reveal className="mx-auto max-w-3xl text-center">
-            <p className="label mb-5 text-ink/35">{noun}</p>
+            <p className="label-section mb-5 text-ink/35">{noun}</p>
 
             {/*
               The page's own noun is picked out of the headline in brand colour.

@@ -49,7 +49,7 @@ export default function EmptyCart() {
 
       {/* ------------------------------------------- discovery shortcuts */}
       <Reveal delay={0.1} className="mt-16 flex items-center gap-4">
-        <span className="label shrink-0 text-ink/35">Browse by organ</span>
+        <span className="label-section shrink-0 text-ink/35">Browse by organ</span>
         <span className="h-px flex-1 bg-ink/10" aria-hidden="true" />
       </Reveal>
 

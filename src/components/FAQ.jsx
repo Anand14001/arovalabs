@@ -35,7 +35,7 @@ export default function FAQ({ items, heading = 'FAQ', index, eyebrow, className 
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,1.45fr)] lg:gap-20">
           <Reveal className="lg:sticky lg:top-28 lg:self-start">
             {(index || eyebrow) && (
-              <p className="label mb-6 text-ink/35">
+              <p className="label-section mb-6 text-ink/35">
                 {index && <span className="label-num">{index}</span>}
                 {eyebrow}
               </p>

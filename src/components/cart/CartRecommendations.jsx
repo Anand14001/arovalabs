@@ -29,7 +29,7 @@ export default function CartRecommendations() {
       <div className="shell">
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
           <div className="max-w-lg">
-            <p className="label mb-4 text-ink/35">Add to your booking</p>
+            <p className="label-section mb-4 text-ink/35">Add to your booking</p>
             <h2 className="display-md">{carouselSections.frequentTests.heading}</h2>
           </div>
 

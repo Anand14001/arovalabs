@@ -25,7 +25,7 @@ export default function HomeCollectionCTA() {
       <div className="shell py-16 sm:py-20">
         <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
           <Reveal className="lg:col-span-7">
-            <p className="label mb-6 text-white/45">{homeCollection.heading}</p>
+            <p className="label-section mb-6 text-white/45">{homeCollection.heading}</p>
             <h2 className="display-lg max-w-xl text-white">{homeCollection.sub}</h2>
           </Reveal>
 

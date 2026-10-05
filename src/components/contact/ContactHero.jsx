@@ -46,7 +46,7 @@ export default function ContactHero() {
       <div className="px-[clamp(1rem,4vw,5rem)] py-14 sm:py-20 lg:py-24 lg:pl-[clamp(2.5rem,5vw,6rem)]">
         <div className="mx-auto max-w-xl lg:mx-0">
           <Reveal>
-            <p className="label mb-6 text-ink/35">Contact Us</p>
+            <p className="label-section mb-6 text-ink/35">Contact Us</p>
             <h1 className="display-lg">{contactPage.heading}</h1>
 
             {/* The manual route, for anyone who would rather not use a form. */}

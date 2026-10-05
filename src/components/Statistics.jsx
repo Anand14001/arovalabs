@@ -22,7 +22,7 @@ export default function Statistics() {
       <div className="shell">
         <Reveal className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
           <h2 className="display-lg">{whyChoose.heading}</h2>
-          <p className="label text-ink/35 lg:justify-self-end">
+          <p className="label-section text-ink/35 lg:justify-self-end">
             <span className="label-num">01</span>
             By the numbers
           </p>
