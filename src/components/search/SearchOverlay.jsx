@@ -244,7 +244,19 @@ export default function SearchOverlay({ open, onClose }) {
         </div>
 
         {/* ----------------------------------------------- the results */}
-        <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {/*
+          `data-lenis-prevent` is load-bearing, not decoration. Lenis listens
+          for wheel and touch on the window and calls preventDefault on them, so
+          a nested scroll container gets no events at all and sits frozen even
+          though its content overflows. This attribute is Lenis' own opt-out: it
+          leaves this subtree to native scrolling while the page behind stays
+          locked.
+        */}
+        <div
+          ref={listRef}
+          data-lenis-prevent
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        >
           {!hasQuery ? (
             <EmptyState
               popular={popular}
