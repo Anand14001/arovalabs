@@ -5,6 +5,7 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'fr
 import { blogSection } from '../data/homepage';
 import { blogs } from '../data/blogs';
 import SectionHeading from './SectionHeading';
+import { decodeEntities } from '../lib/text';
 
 /*
  * "Latest Health Blogs" — all three posts, in the reference site's order.
@@ -49,9 +50,8 @@ export default function BlogSection() {
     <section className="section-lg rule-top">
       <div className="shell">
         <SectionHeading
-          index="11"
-          eyebrow="Journal"
           heading={blogSection.heading}
+          sub={blogSection.sub}
           viewMore={`/category/${blogs[0]?.categorySlug ?? 'nutrition'}/`}
           viewMoreLabel="All articles"
         />
@@ -128,7 +128,7 @@ function BlogRow({ post, index, reduced }) {
           <div>
             {post.category && <span className="label mb-3 text-accent">{post.category}</span>}
             <p className="line-clamp-3-fixed text-sm leading-relaxed text-body">
-              {post.excerpt}
+              {decodeEntities(post.excerpt)}
             </p>
           </div>
 

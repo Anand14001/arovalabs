@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LayoutGrid, List, Search, X } from 'lucide-react';
 import ProductRow from '../components/ProductRow';
 import TestCard from '../components/TestCard';
@@ -6,7 +7,7 @@ import PackageCard from '../components/PackageCard';
 import Reveal, { RevealGroup, RevealItem } from '../components/motion/Reveal';
 import { listingPages } from '../data/pages';
 import { packages, tests } from '../data/products';
-import { orderByOptions, productCategories } from '../data/taxonomies';
+import { orderByOptions, productCategories, productTags } from '../data/taxonomies';
 
 /*
  * /tests/ and /packages/ — the product catalogue.
@@ -60,8 +61,39 @@ export default function Listing({ which }) {
     [parentSlug, source],
   );
 
+  /*
+   * Category and organ live in the query string, not in component state.
+   *
+   * A product breadcrumb, an organ tile and a search result all need to open
+   * this page already narrowed, and a filter held only in state cannot be
+   * linked to. Keeping it in the URL also makes a filtered view shareable and
+   * survivable across a reload, and lets the browser back button undo a filter
+   * the way people expect — chip clicks push a history entry rather than
+   * replacing one, so Back steps back through the filters applied.
+   */
+  const [params, setParams] = useSearchParams();
+
+  const categoryParam = params.get('category');
+  const organParam = params.get('organ');
+
+  const category =
+    categoryParam && productCategories.some((c) => c.slug === categoryParam)
+      ? categoryParam
+      : ALL;
+
+  const organ = productTags.some((t) => t.slug === organParam) ? organParam : null;
+
+  const setCategory = (slug) => {
+    const next = new URLSearchParams(params);
+    // Category and organ are two ways of narrowing the same list, so picking
+    // one clears the other rather than silently intersecting them.
+    next.delete('organ');
+    if (slug === ALL) next.delete('category');
+    else next.set('category', slug);
+    setParams(next);
+  };
+
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState(ALL);
   const [sort, setSort] = useState('menu_order');
   const [view, setView] = useState('grid');
 
@@ -70,6 +102,7 @@ export default function Listing({ which }) {
     let list = source;
 
     if (category !== ALL) list = list.filter((p) => p.cats.includes(category));
+    if (organ) list = list.filter((p) => (p.tags ?? []).includes(organ));
 
     if (q) {
       list = list.filter(
@@ -86,13 +119,21 @@ export default function Listing({ which }) {
     if (sort === 'price-desc') list = [...list].sort((a, b) => b.salePrice - a.salePrice);
 
     return list;
-  }, [query, category, sort, source, ALL]);
+  }, [query, category, organ, sort, source, ALL]);
 
-  const filtered = category !== ALL || query.trim().length > 0;
+  const filtered = category !== ALL || Boolean(organ) || query.trim().length > 0;
+
   const clearAll = () => {
     setQuery('');
-    setCategory(ALL);
+    const next = new URLSearchParams(params);
+    next.delete('category');
+    next.delete('organ');
+    setParams(next);
   };
+
+  // An organ arrives from the homepage tiles and the search overlay; it has no
+  // chip of its own, so it is surfaced as an active filter in the count row.
+  const activeOrgan = organ ? productTags.find((t) => t.slug === organ) : null;
 
   const chips = [{ slug: ALL, name: ALL, count: source.length }, ...categories];
   const isGrid = view === 'grid';
@@ -198,6 +239,17 @@ export default function Listing({ which }) {
             <p className="text-[13px] text-body">
               <span className="stat-figure text-base text-ink">{results.length}</span>{' '}
               {noun.toLowerCase()}
+              {/*
+                An organ narrowing arrives by link — from the homepage tiles or
+                the search overlay — and has no chip in the strip, so it is named
+                here. Otherwise the count would drop with nothing on screen
+                explaining why.
+              */}
+              {activeOrgan && (
+                <span className="ml-3 inline-flex items-center gap-1.5 rounded-full bg-brand-light px-2.5 py-1 align-middle text-[12px] font-semibold text-brand">
+                  {activeOrgan.name}
+                </span>
+              )}
               {filtered && (
                 <button
                   type="button"
@@ -277,7 +329,7 @@ export default function Listing({ which }) {
              * screen.
              */
             onMount
-            key={`${view}-${category}-${sort}-${query}`}
+            key={`${view}-${category}-${organ}-${sort}-${query}`}
             className={
               isGrid
                 ? 'mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3'

@@ -22,7 +22,7 @@ import Reveal from './motion/Reveal';
  * usual here: with smooth scrolling the viewport is often still settling when a
  * row is clicked, and a snapping panel on a moving page is disorienting.
  */
-export default function FAQ({ items, heading = 'FAQ', index, eyebrow, className = '' }) {
+export default function FAQ({ items, heading = 'FAQ', index, eyebrow, sub, className = '' }) {
   const [open, setOpen] = useState(0);
   const reduced = useReducedMotion();
   const uid = useId();
@@ -41,6 +41,7 @@ export default function FAQ({ items, heading = 'FAQ', index, eyebrow, className 
               </p>
             )}
             {heading && <h2 className="display-lg">{heading}</h2>}
+            {sub && <p className="section-sub max-w-sm">{sub}</p>}
           </Reveal>
 
           <Reveal y={22} className="border-t border-ink/12">

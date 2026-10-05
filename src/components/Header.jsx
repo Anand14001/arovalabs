@@ -4,7 +4,6 @@ import { useLenis } from 'lenis/react';
 import { ArrowUpRight, Menu, Phone, Search, ShoppingBag, User, X } from 'lucide-react';
 import { contact, mainNav, site } from '../data/site';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
 import LoginPopup from './LoginPopup';
 import SearchOverlay from './search/SearchOverlay';
 
@@ -43,7 +42,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { count, total } = useCart();
+  const { count } = useCart();
   const { pathname } = useLocation();
   const lenis = useLenis();
 
@@ -166,6 +165,7 @@ export default function Header() {
                 here whose state the visitor is actively tracking. */}
             <Link
               to="/cart/"
+              aria-label={`Cart${count > 0 ? `, ${count} items` : ''}`}
               className="group flex items-center gap-2.5 rounded-full py-1.5 pl-2 pr-1.5 transition-colors hover:bg-brand-light/60 sm:pr-3"
             >
               <span className="relative text-ink">
@@ -175,9 +175,6 @@ export default function Header() {
                     {count}
                   </span>
                 )}
-              </span>
-              <span className="hidden text-[13px] font-semibold tabular-nums text-ink sm:inline">
-                {formatPrice(total)}
               </span>
             </Link>
 

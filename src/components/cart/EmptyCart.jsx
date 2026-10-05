@@ -4,6 +4,7 @@ import { emptyCart } from '../../data/pages';
 import { productTags } from '../../data/taxonomies';
 import { carouselSections } from '../../data/homepage';
 import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
+import { organHref } from '../../lib/listingRoutes';
 
 /*
  * The empty cart.
@@ -61,7 +62,7 @@ export default function EmptyCart() {
         {productTags.map((tag) => (
           <RevealItem as="li" key={tag.slug} y={14} className="flex">
             <Link
-              to={`/product-tag/${tag.slug}/`}
+              to={organHref(tag.slug)}
               className="card card-interactive group flex w-full items-center gap-3 p-4"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-light transition-colors duration-300 group-hover:bg-brand">

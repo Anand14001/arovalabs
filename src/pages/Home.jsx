@@ -67,13 +67,10 @@ export default function Home() {
 
       <Hero />
       <QuickActions />
-      <Statistics />
 
       {/* ------------------------------------------------- 2. shop --------- */}
 
       <ProductShowcase
-        index="02"
-        eyebrow="Popular tests"
         heading={carouselSections.frequentTests.heading}
         sub={carouselSections.frequentTests.sub}
         viewMore={carouselSections.frequentTests.viewMore}
@@ -84,8 +81,6 @@ export default function Home() {
       <OrganCategories />
 
       <ProductShowcase
-        index="04"
-        eyebrow="Health packages"
         heading={carouselSections.frequentPackages.heading}
         sub={carouselSections.frequentPackages.sub}
         viewMore={carouselSections.frequentPackages.viewMore}
@@ -102,8 +97,6 @@ export default function Home() {
       {/* ------------------------------------------------ 4. prove --------- */}
 
       <ProductShowcase
-        index="08"
-        eyebrow="Doctor recommended"
         heading={carouselSections.prescribedTests.heading}
         sub={carouselSections.prescribedTests.sub}
         viewMore={carouselSections.prescribedTests.viewMore}
@@ -112,10 +105,15 @@ export default function Home() {
       />
 
       <VideoSection />
-      <Testimonials index="10" eyebrow="Patient voices" />
+      <Statistics />
+      <Testimonials />
       <BlogSection />
 
-      <FAQ index="12" eyebrow="Good to know" items={homeFaqs} heading="FAQ" />
+      <FAQ
+        items={homeFaqs}
+        heading="FAQ"
+        sub="Find answers to common questions about our tests and services."
+      />
     </>
   );
 }

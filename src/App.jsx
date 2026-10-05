@@ -5,7 +5,7 @@ import Listing from './pages/Listing';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import ProductDetail from './pages/ProductDetail';
-import ProductArchive from './pages/ProductArchive';
+import ArchiveRedirect from './pages/ArchiveRedirect';
 import BlogPost from './pages/BlogPost';
 import BlogCategory from './pages/BlogCategory';
 import Cart from './pages/Cart';
@@ -50,21 +50,21 @@ export default function App() {
         <Route path="/terms-of-service/" element={<LegalPage slug="terms-of-service" />} />
         <Route path="/sample-page/" element={<SamplePage />} />
 
-        {/* WooCommerce */}
-        <Route path="/shop/" element={<ProductArchive mode="shop" />} />
+        {/* WooCommerce. The archive paths now redirect into the listings. */}
+        <Route path="/shop/" element={<ArchiveRedirect mode="shop" />} />
         <Route path="/cart/" element={<Cart />} />
         <Route path="/checkout/" element={<Checkout />} />
         <Route path="/my-account/" element={<MyAccount />} />
         <Route path="/product/:slug/" element={<ProductDetail />} />
         <Route
           path="/product-category/:parent/"
-          element={<ProductArchive mode="category" />}
+          element={<ArchiveRedirect mode="category" />}
         />
         <Route
           path="/product-category/:parent/:child/"
-          element={<ProductArchive mode="category" />}
+          element={<ArchiveRedirect mode="category" />}
         />
-        <Route path="/product-tag/:slug/" element={<ProductArchive mode="tag" />} />
+        <Route path="/product-tag/:slug/" element={<ArchiveRedirect mode="tag" />} />
 
         {/* Blog */}
         <Route path="/category/:slug/" element={<BlogCategory />} />

@@ -22,9 +22,6 @@ import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
 
 const telHref = (value) => `tel:${value.split('-')[0].replace(/[^\d+]/g, '')}`;
 
-// Each channel sits a step lower than the last, drawing a diagonal.
-const OFFSETS = ['lg:mt-0', 'lg:mt-10', 'lg:mt-20', 'lg:mt-30'];
-
 export default function ContactChannels() {
   const [whatsapp] = quickActions;
   const [phoneCard, emailCard, visitCard] = contactPage.cards;
@@ -81,17 +78,17 @@ export default function ContactChannels() {
         <RevealGroup
           as="ul"
           stagger={0.09}
-          className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
+          className="mt-16 grid items-stretch gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4"
         >
-          {channels.map((channel, i) => {
+          {channels.map((channel) => {
             const Icon = channel.icon;
             return (
-              <RevealItem as="li" key={channel.key} y={18} className={OFFSETS[i]}>
+              <RevealItem as="li" key={channel.key} y={18} className="h-full">
                 <a
                   href={channel.href}
                   target={channel.external ? '_blank' : undefined}
                   rel={channel.external ? 'noreferrer' : undefined}
-                  className="group block"
+                  className="group flex h-full flex-col"
                 >
                   <span className="grid size-12 place-items-center rounded-full bg-brand-light text-brand transition-all duration-300 group-hover:bg-brand group-hover:text-white">
                     <Icon size={19} strokeWidth={1.9} />
@@ -108,11 +105,11 @@ export default function ContactChannels() {
                     />
                   </span>
 
-                  <span className="mt-2 block text-[13px] leading-relaxed text-body">
+                  <span className="mt-2 block min-h-11 text-[13px] leading-relaxed text-body">
                     {channel.meta}
                   </span>
 
-                  <span className="mt-4 block border-t border-ink/10 pt-4 text-[15px] font-semibold leading-snug text-brand">
+                  <span className="mt-auto block border-t border-ink/10 pt-4 text-[15px] font-semibold leading-snug text-brand">
                     {channel.value}
                   </span>
                 </a>

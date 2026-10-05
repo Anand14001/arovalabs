@@ -40,11 +40,16 @@ export default function ProductShowcase({
 }) {
   const reduced = useReducedMotion();
   const wide = useMediaQuery('(min-width: 1024px)');
+  const isMobile = useMediaQuery('(max-width: 639px)');
 
   const Card = variant === 'package' ? PackageCard : TestCard;
   const overflows = products.length > 4;
 
   const headingProps = { index, eyebrow, heading, sub, viewMore, viewMoreLabel };
+
+  if (isMobile) {
+    return <ScrollRail {...headingProps} products={products} Card={Card} variant={variant} />;
+  }
 
   if (!overflows) {
     return <Grid {...headingProps} products={products} Card={Card} />;
@@ -244,7 +249,7 @@ function ScrollRail({ products, Card, variant, ...headingProps }) {
           <RevealItem
             key={`${product.id}-${i}`}
             role="listitem"
-            className={`flex ${variant === 'package' ? 'w-[82vw] max-w-sm' : 'w-[74vw] max-w-xs'}`}
+            className="flex w-[82vw] max-w-sm"
           >
             <Card product={product} />
           </RevealItem>
@@ -273,25 +278,25 @@ function ScrollRail({ products, Card, variant, ...headingProps }) {
 /* ----------------------------------------------------------------- heading */
 
 /*
- * `compact` is the pinned variant: every pixel the heading takes is a pixel the
- * cards lose, so the standfirst moves out of the heading's column and sits
- * beside the link instead of stacking under the title. Same content, roughly
- * half the height.
+ * `compact` is the pinned variant. Keep the standfirst beneath the title so
+ * the heading and its supporting copy read together at every screen size.
  */
 function ShowcaseHeading({ index, eyebrow, heading, sub, viewMore, viewMoreLabel, compact }) {
   if (compact) {
     return (
       <Reveal className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-        <div>
-          <p className="label-section mb-3 text-ink/35">
-            <span className="label-num">{index}</span>
-            {eyebrow}
-          </p>
+        <div className="max-w-xl">
+          {(index || eyebrow) && (
+            <p className="label-section mb-3 text-ink/35">
+              {index && <span className="label-num">{index}</span>}
+              {eyebrow}
+            </p>
+          )}
           <h2 className="display-lg">{heading}</h2>
+          {sub && <p className="section-sub max-w-md">{sub}</p>}
         </div>
 
         <div className="flex shrink-0 items-end gap-8">
-          {sub && <p className="hidden max-w-xs text-sm leading-relaxed text-body xl:block">{sub}</p>}
           {viewMore && (
             <Link to={viewMore} className="link-arrow shrink-0">
               {viewMoreLabel}
@@ -306,10 +311,12 @@ function ShowcaseHeading({ index, eyebrow, heading, sub, viewMore, viewMoreLabel
   return (
     <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
       <div className="max-w-xl">
-        <p className="label-section mb-6 text-ink/35">
-          <span className="label-num">{index}</span>
-          {eyebrow}
-        </p>
+        {(index || eyebrow) && (
+          <p className="label-section mb-6 text-ink/35">
+            {index && <span className="label-num">{index}</span>}
+            {eyebrow}
+          </p>
+        )}
         <h2 className="display-lg">{heading}</h2>
         {sub && <p className="section-sub max-w-md">{sub}</p>}
       </div>

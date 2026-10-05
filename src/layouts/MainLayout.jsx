@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import TrustRibbon from '../components/TrustRibbon';
 import Footer from '../components/Footer';
 import ScrollProgress from '../components/ScrollProgress';
+import Toasts from '../components/Toasts';
 
 // Shared chrome for every page: trust ribbon, header, footer.
 export default function MainLayout() {
@@ -35,6 +36,7 @@ export default function MainLayout() {
       </main>
 
       <Footer />
+      <Toasts />
     </div>
   );
 }

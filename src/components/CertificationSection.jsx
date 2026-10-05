@@ -25,11 +25,8 @@ export default function CertificationSection() {
       <div className="shell">
         {/* ------------------------------------------------- the heading */}
         <Reveal>
-          <p className="label-section mb-6 text-ink/35">
-            <span className="label-num">07</span>
-            Accreditation
-          </p>
           <h2 className="display-lg max-w-lg">{certification.heading}</h2>
+          <p className="section-sub max-w-2xl">{certification.sub}</p>
         </Reveal>
 
         {/* --------------------------------------- the evidence statement */}

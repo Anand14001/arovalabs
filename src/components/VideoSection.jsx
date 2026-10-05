@@ -26,13 +26,9 @@ export default function VideoSection() {
       <div className="shell">
         <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
           <div className="max-w-xl">
-            <p className="label-section mb-6 text-ink/35">
-              <span className="label-num">09</span>
-              Inside the lab
-            </p>
             <h2 className="display-lg">{videoSection.heading}</h2>
+            <p className="section-sub max-w-md">{videoSection.sub}</p>
           </div>
-          <p className="max-w-sm text-[15px] leading-relaxed text-body">{videoSection.sub}</p>
         </Reveal>
 
         {/*

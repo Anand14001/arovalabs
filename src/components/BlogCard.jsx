@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { decodeEntities } from '../lib/text';
 
 /*
  * Post card, in three shapes:
@@ -71,7 +72,7 @@ export default function BlogCard({ post, variant = 'default' }) {
             row ? 'line-clamp-2-fixed text-[13px]' : 'text-sm'
           }`}
         >
-          {post.excerpt}
+          {decodeEntities(post.excerpt)}
         </p>
 
         <Link to={href} className="link-arrow mt-5">

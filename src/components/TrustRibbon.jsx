@@ -19,7 +19,7 @@ export default function TrustRibbon() {
 
   return (
     <div
-      className="band-brand marquee-mask overflow-hidden py-2.5"
+      className="band-brand overflow-hidden py-2.5"
       aria-label="Why patients choose us"
     >
       <div className="marquee" style={{ '--marquee-duration': '55s' }}>

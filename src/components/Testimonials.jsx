@@ -36,6 +36,7 @@ export default function Testimonials({ index, eyebrow }) {
             </p>
           )}
           <h2 className="display-lg">{testimonialsHeading}</h2>
+          <p className="section-sub max-w-xl">Read what patients share about their experience with Arova Labs.</p>
         </Reveal>
       </div>
 

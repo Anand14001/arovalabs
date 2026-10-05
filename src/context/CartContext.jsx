@@ -1,5 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { getProductById } from '../data/products';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { getProductById } from "../data/products";
 
 /*
  * Client-side cart only.
@@ -15,7 +23,7 @@ import { getProductById } from '../data/products';
  */
 
 const CartContext = createContext(null);
-const STORAGE_KEY = 'arova-cart';
+const STORAGE_KEY = "arova-cart";
 
 // localStorage can throw (private mode, blocked site data), so every access is guarded.
 function readStoredCart() {
@@ -26,7 +34,10 @@ function readStoredCart() {
     if (!Array.isArray(parsed)) return [];
     return parsed
       .filter((i) => i && getProductById(i.id))
-      .map((i) => ({ id: Number(i.id), quantity: Math.max(1, Number(i.quantity) || 1) }));
+      .map((i) => ({
+        id: Number(i.id),
+        quantity: Math.max(1, Number(i.quantity) || 1),
+      }));
   } catch {
     return [];
   }
@@ -34,6 +45,30 @@ function readStoredCart() {
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readStoredCart);
+
+  /*
+   * Cart additions raise a toast from here rather than from each call site, so
+   * every path that adds something — product cards, the product page, the
+   * catalogue rows, the cart's own suggestions — confirms itself without
+   * having to remember to.
+   */
+  const [toasts, setToasts] = useState([]);
+  const toastTimers = useRef(new Map());
+
+  const dismissToast = useCallback((id) => {
+    clearTimeout(toastTimers.current.get(id));
+    toastTimers.current.delete(id);
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  // Clear every pending timer if the provider ever unmounts.
+  useEffect(
+    () => () => {
+      toastTimers.current.forEach(clearTimeout);
+      toastTimers.current.clear();
+    },
+    [],
+  );
 
   useEffect(() => {
     try {
@@ -43,19 +78,40 @@ export function CartProvider({ children }) {
     }
   }, [items]);
 
-  const addItem = useCallback((productId, quantity = 1) => {
-    const product = getProductById(productId);
-    if (!product) return;
-    setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
-        );
-      }
-      return [...prev, { id: product.id, quantity }];
-    });
-  }, []);
+  const addItem = useCallback(
+    (productId, quantity = 1, { notify = true } = {}) => {
+      const product = getProductById(productId);
+      if (!product) return;
+      setItems((prev) => {
+        const existing = prev.find((i) => i.id === product.id);
+        if (existing) {
+          return prev.map((i) =>
+            i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
+          );
+        }
+        return [...prev, { id: product.id, quantity }];
+      });
+
+      if (!notify) return;
+
+      const id = `${product.id}-${Date.now()}`;
+      // Only ever one toast on screen: a stack of them is noise, and the latest
+      // addition is the only one anybody is looking for.
+      setToasts((prev) => {
+        prev.forEach((t) => clearTimeout(toastTimers.current.get(t.id)));
+        toastTimers.current.clear();
+        return [
+          { id, title: product.title, price: product.salePrice * quantity },
+        ];
+      });
+
+      toastTimers.current.set(
+        id,
+        setTimeout(() => dismissToast(id), 4000),
+      );
+    },
+    [dismissToast],
+  );
 
   const removeItem = useCallback((productId) => {
     setItems((prev) => prev.filter((i) => i.id !== productId));
@@ -63,7 +119,9 @@ export function CartProvider({ children }) {
 
   const setQuantity = useCallback((productId, quantity) => {
     const qty = Math.max(1, Number(quantity) || 1);
-    setItems((prev) => prev.map((i) => (i.id === productId ? { ...i, quantity: qty } : i)));
+    setItems((prev) =>
+      prev.map((i) => (i.id === productId ? { ...i, quantity: qty } : i)),
+    );
   }, []);
 
   const clear = useCallback(() => setItems([]), []);
@@ -77,16 +135,29 @@ export function CartProvider({ children }) {
       .filter(Boolean);
 
     const count = detailed.reduce((sum, i) => sum + i.quantity, 0);
-    const total = detailed.reduce((sum, i) => sum + i.product.salePrice * i.quantity, 0);
+    const total = detailed.reduce(
+      (sum, i) => sum + i.product.salePrice * i.quantity,
+      0,
+    );
 
-    return { items: detailed, count, total, addItem, removeItem, setQuantity, clear };
-  }, [items, addItem, removeItem, setQuantity, clear]);
+    return {
+      items: detailed,
+      count,
+      total,
+      addItem,
+      removeItem,
+      setQuantity,
+      clear,
+      toasts,
+      dismissToast,
+    };
+  }, [items, addItem, removeItem, setQuantity, clear, toasts, dismissToast]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used inside <CartProvider>');
+  if (!ctx) throw new Error("useCart must be used inside <CartProvider>");
   return ctx;
 }

@@ -423,20 +423,31 @@
 
   /* ----------------------------------------------------------------- prose */
 
+  /*
+   * Article body. Set for sustained reading rather than for a marketing page:
+   * 17px with a 1.8 measure, headings that earn their space with a large top
+   * margin and a small bottom one so each one binds to the text it introduces,
+   * and a scroll margin so an anchored heading clears the sticky header
+   * instead of hiding behind it.
+   */
   .prose-arova {
-    @apply text-[15px] leading-[1.75] text-body;
+    @apply text-[17px] leading-[1.8] text-body;
+  }
+
+  .prose-arova > :first-child {
+    @apply mt-0;
   }
 
   .prose-arova h2 {
-    @apply mb-3 mt-10 text-xl font-semibold tracking-tight text-ink sm:text-2xl;
+    @apply mb-4 mt-14 scroll-mt-28 text-[clamp(1.375rem,1.1rem+0.9vw,1.75rem)] font-semibold leading-snug tracking-tight text-ink;
   }
 
   .prose-arova h3 {
-    @apply mb-2 mt-7 text-lg font-semibold tracking-tight text-ink;
+    @apply mb-3 mt-10 scroll-mt-28 text-xl font-semibold tracking-tight text-ink;
   }
 
   .prose-arova p {
-    @apply mb-4;
+    @apply mb-6;
   }
 
   .prose-arova strong {
@@ -444,48 +455,38 @@
   }
 
   .prose-arova a {
-    @apply text-brand underline underline-offset-2 hover:text-brand-dark;
+    @apply text-brand underline decoration-brand/30 underline-offset-4 transition-colors hover:decoration-brand;
   }
 
+  /* Lists carry their own markers in brand colour, inset so the text block
+     keeps the same left edge as the paragraphs around it. */
   .prose-arova ul,
   .prose-arova ol {
-    @apply mb-4 space-y-1.5 pl-5;
+    @apply mb-6 space-y-3 pl-6;
   }
 
   .prose-arova ul {
-    @apply list-disc;
+    @apply list-disc marker:text-brand;
   }
 
   .prose-arova ol {
-    @apply list-decimal;
+    @apply list-decimal marker:font-semibold marker:text-brand;
+  }
+
+  .prose-arova li::marker {
+    font-size: 0.9em;
   }
 
   .prose-arova img {
-    @apply my-6 rounded-2xl;
+    @apply my-10 rounded-2xl;
   }
 
   .prose-arova blockquote {
-    @apply my-5 border-l-2 border-accent pl-5 italic;
+    @apply my-8 border-l-2 border-accent pl-6 text-[18px] italic leading-relaxed text-ink;
   }
-}
 
-@utility line-clamp-2-fixed {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-@utility line-clamp-4-fixed {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
-}
-
-@utility line-clamp-3-fixed {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
+  /* The opening paragraph, pulled out of the body and set as a standfirst. */
+  .prose-lead {
+    @apply text-[clamp(1.0625rem,1rem+0.4vw,1.25rem)] leading-[1.7] text-ink;
+  }
 }

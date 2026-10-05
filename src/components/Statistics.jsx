@@ -1,71 +1,95 @@
+import {
+  ArrowUpRight,
+  Award,
+  Building2,
+  FlaskConical,
+  Heart,
+  Package,
+  TestTubeDiagonal,
+  UsersRound,
+  CarFront,
+} from 'lucide-react';
 import { whyChoose } from '../data/homepage';
 import Counter from './Counter';
 import Reveal, { RevealGroup, RevealItem } from './motion/Reveal';
+import './Statistics.css';
 
-/*
- * "Why Choose Arova labs?" — the page's credibility anchor.
- *
- * Nine numbers previously sat in nine identical boxes, which turned the
- * strongest content on the page into a spec sheet. Here they are typeset: the
- * figures are the display face at poster size, the labels are small caps
- * underneath, and the only structure is a hairline grid. Nothing is boxed,
- * because a number that large does not need a container to be noticed.
- *
- * The awards figures follow at half the scale on the same grid — subordinate by
- * size rather than by being parked in a separate panel.
- *
- * ("labs" lowercase in the heading is the reference site's own wording.)
- */
+const featureIcons = [FlaskConical, UsersRound, Heart];
+const featureTones = ['accent', 'brand', 'soft'];
+const metricIcons = [Award, TestTubeDiagonal, Package, Building2, CarFront];
+const reachMetrics = [
+  whyChoose.awardCounters[0],
+  whyChoose.awardCounters[1],
+  whyChoose.awardCounters[2],
+  whyChoose.counters[3],
+  whyChoose.counters[4],
+];
+
 export default function Statistics() {
   return (
-    <section className="section-lg rule-top">
+    <section className="why-choose section-lg" aria-labelledby="why-choose-title">
       <div className="shell">
-        <Reveal className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
-          <h2 className="display-lg">{whyChoose.heading}</h2>
-          <p className="label-section text-ink/35 lg:justify-self-end">
-            <span className="label-num">01</span>
-            By the numbers
-          </p>
-        </Reveal>
+        <div className="why-choose__hero">
+          <Reveal className="why-choose__intro">
+            <h2 id="why-choose-title" className="why-choose__title">
+              Why Choose <span>Arova labs?</span>
+            </h2>
+            <p className="why-choose__sub">{whyChoose.sub}</p>
+          </Reveal>
 
-        {/* ------------------------------------------- headline figures */}
-        <RevealGroup
-          as="dl"
-          stagger={0.08}
-          className="mt-14 grid grid-cols-2 border-t border-ink/12 sm:grid-cols-3 lg:grid-cols-5"
-        >
-          {whyChoose.counters.map((c) => (
-            <RevealItem
-              key={c.label}
-              y={16}
-              className="border-b border-r border-ink/12 px-5 py-9 first:pl-0 lg:border-b-0 lg:last:border-r-0"
-            >
-              <dd className="stat-figure text-[clamp(2rem,3.2vw,3.25rem)] text-ink">
-                <Counter value={c.value} suffix={c.suffix} />
-              </dd>
-              <dt className="mt-4 max-w-[14rem] text-[13px] leading-snug text-body">
-                {c.label}
-              </dt>
-            </RevealItem>
-          ))}
+          <Reveal className="why-choose__visual" y={28}>
+            <div className="why-choose__dots" aria-hidden="true" />
+            <img
+              src="/assets/919397855f803d31f1d4.webp"
+              alt="A laboratory technician working with diagnostic equipment"
+              loading="lazy"
+              decoding="async"
+            />
+          </Reveal>
+        </div>
+
+        <RevealGroup as="ul" stagger={0.09} className="why-choose__features">
+          {whyChoose.counters.slice(0, 3).map((metric, index) => {
+            const Icon = featureIcons[index];
+            return (
+              <RevealItem
+                as="li"
+                key={metric.label}
+                y={18}
+                className={`why-choose__feature why-choose__feature--${featureTones[index]}`}
+              >
+                <span className="why-choose__feature-icon"><Icon size={23} strokeWidth={1.8} aria-hidden="true" /></span>
+                <ArrowUpRight className="why-choose__feature-arrow" size={19} strokeWidth={1.7} aria-hidden="true" />
+                <dl className="why-choose__feature-copy">
+                  <dd className="why-choose__feature-value"><Counter value={metric.value} suffix={metric.suffix} /></dd>
+                  <dt className="why-choose__feature-label">{metric.label}</dt>
+                </dl>
+              </RevealItem>
+            );
+          })}
         </RevealGroup>
 
-        {/* ------------------------------------------------ awards figures */}
-        <Reveal className="mt-14 flex items-baseline gap-4">
-          <h3 className="label text-accent">{whyChoose.awardsLabel.join(' ')}</h3>
-          <span className="h-px flex-1 bg-ink/12" aria-hidden="true" />
-        </Reveal>
-
-        <RevealGroup as="dl" stagger={0.07} className="mt-8 grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {whyChoose.awardCounters.map((c) => (
-            <RevealItem key={c.label} y={14}>
-              <dd className="stat-figure text-[clamp(1.5rem,2.1vw,2.125rem)] text-brand">
-                <Counter value={c.value} suffix={c.suffix} />
-              </dd>
-              <dt className="mt-3 text-[13px] leading-snug text-body">{c.label}</dt>
-            </RevealItem>
-          ))}
-        </RevealGroup>
+        <div className="why-choose__reach">
+          <div className="why-choose__reach-heading">
+            <span />
+            <h3>Our reach &amp; expertise</h3>
+            <span />
+          </div>
+          <RevealGroup as="ul" stagger={0.06} className="why-choose__metrics">
+            {reachMetrics.map((metric, index) => {
+              const Icon = metricIcons[index];
+              return (
+                <RevealItem as="li" key={metric.label} y={14} className="why-choose__metric">
+                  <span className="why-choose__metric-icon"><Icon size={23} strokeWidth={1.75} aria-hidden="true" /></span>
+                  <dl className="why-choose__metric-copy">
+                    <dd><Counter value={metric.value} suffix={metric.suffix} /></dd>
+                    <dt>{metric.label}</dt>
+                  </dl>
+                </RevealItem>
+              );
+            })}
+          </RevealGroup>
+        </div>
       </div>
     </section>
   );

@@ -3,6 +3,7 @@ import { products } from '../../data/products';
 import { productCategories, productTags } from '../../data/taxonomies';
 import { blogs } from '../../data/blogs';
 import { mainNav } from '../../data/site';
+import { categoryHref, organHref } from '../../lib/listingRoutes';
 import { quickActions } from '../../data/homepage';
 import { myAccountPage } from '../../data/pages';
 
@@ -64,7 +65,7 @@ function buildIndex() {
       kind: 'category',
       title: category.name,
       subtitle: category.parent === 'packages' ? 'Packages' : 'Tests',
-      to: `/product-category/${category.path}/`,
+      to: categoryHref(category),
       keywords: [category.slug, category.parent],
     });
   }
@@ -75,7 +76,7 @@ function buildIndex() {
       kind: 'organ',
       title: tag.name,
       subtitle: 'Browse by organ',
-      to: `/product-tag/${tag.slug}/`,
+      to: organHref(tag.slug),
       icon: tag.icon,
       keywords: [tag.slug, 'organ'],
     });

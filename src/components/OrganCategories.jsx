@@ -4,6 +4,7 @@ import { organSection } from '../data/homepage';
 import { productTags } from '../data/taxonomies';
 import SectionHeading from './SectionHeading';
 import { RevealGroup, RevealItem } from './motion/Reveal';
+import { organHref } from '../lib/listingRoutes';
 
 /*
  * "Choose Test by Organ" — six entry points into the product_tag archives.
@@ -28,8 +29,6 @@ export default function OrganCategories() {
     <section className="section-lg rule-top">
       <div className="shell">
         <SectionHeading
-          index="03"
-          eyebrow="Browse by organ"
           heading={organSection.heading}
           sub={organSection.sub}
           viewMore={organSection.viewMore}
@@ -43,7 +42,7 @@ export default function OrganCategories() {
           {productTags.map((tag) => (
             <RevealItem key={tag.slug} as="li" y={16} className="flex">
               <Link
-                to={`/product-tag/${tag.slug}/`}
+                to={organHref(tag.slug)}
                 className="card card-interactive group flex w-full flex-col p-5"
               >
                 <span className="grid size-14 place-items-center rounded-xl bg-brand-light transition-colors duration-300 group-hover:bg-brand">

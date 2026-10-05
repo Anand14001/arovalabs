@@ -18,6 +18,7 @@ import { formatPrice, frequentlyBookedTests } from '../../data/products';
 import { productTags } from '../../data/taxonomies';
 import { searchPlaceholder } from '../../data/site';
 import { carouselSections } from '../../data/homepage';
+import { organHref } from '../../lib/listingRoutes';
 
 /*
  * The search overlay.
@@ -490,7 +491,7 @@ function EmptyState({ popular, recent, onPick, onForget, onClear, onNavigate }) 
             <li key={tag.slug}>
               <button
                 type="button"
-                onClick={() => onNavigate(`/product-tag/${tag.slug}/`)}
+                onClick={() => onNavigate(organHref(tag.slug))}
                 className="flex items-center gap-2 rounded-full py-2 pl-2 pr-4 text-[13px] font-medium text-body ring-1 ring-inset ring-ink/12 transition-all hover:text-brand hover:ring-brand/40"
               >
                 <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-light">

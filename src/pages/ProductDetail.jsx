@@ -1,6 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { AlertCircle, BadgeCheck, Check, ShieldCheck } from 'lucide-react';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { resolveTrail } from '../lib/listingRoutes';
 import ProductCarousel from '../components/ProductCarousel';
 import SectionHeading from '../components/SectionHeading';
 import FAQ from '../components/FAQ';
@@ -38,7 +39,7 @@ export default function ProductDetail() {
   return (
     <>
       <div className="shell">
-        <Breadcrumbs trail={product.breadcrumb} current={product.title} />
+        <Breadcrumbs trail={resolveTrail(product.breadcrumb)} current={product.title} />
       </div>
 
       <div className="shell grid gap-8 pb-10 lg:grid-cols-[1fr_380px]">

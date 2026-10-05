@@ -50,7 +50,7 @@ export const trustMarquee = {
   items: [
     '15,000+ patients served',
     'NABL Certified',
-    '25 years of excellence',
+    "25 year's of excellence",
     'Reports in 24 hrs',
   ],
 };
@@ -123,6 +123,7 @@ export const organSection = {
 // 10. Certified Quality Assurance.
 export const certification = {
   heading: 'Certified Quality Assurance',
+  sub: 'Quality standards and trusted diagnostic expertise support every result.',
   badges: [
     {
       icon: '/assets/nab-m.svg',
@@ -174,6 +175,7 @@ export const whatsappReports = {
 // 14. Why Choose Arova labs? — lowercase "labs" preserved from the reference site.
 export const whyChoose = {
   heading: 'Why Choose Arova labs?',
+  sub: 'Reliable diagnostics, experienced teams and convenient collection, centered on your care.',
   counters: [
     { value: 25000, suffix: 'Mn', label: 'High-quality diagnostic tests every year' },
     { value: 1000, suffix: '+', label: 'Technicians' },
@@ -194,7 +196,7 @@ export const whyChoose = {
 // on the reference site, and "Expert Consultations" repeats three times.
 export const videoSection = {
   heading: 'See Arova in Action',
-  sub: 'Watch our specialized medical team provide an in-depth exploration of advanced diagnostic technologies and rigorous laboratory protocols',
+  sub: 'A closer look at our people, diagnostic technology and laboratory processes.',
   cta: { label: 'Explore more content', to: '#' },
   videos: [
     'Advanced Diagnostic Systems',
@@ -225,4 +227,7 @@ export const homeFaqs = [
   'Do you conduct Histopathology tests?',
 ].map((q) => ({ q, a: placeholderAnswer }));
 
-export const blogSection = { heading: 'Latest Health Blogs' };
+export const blogSection = {
+  heading: 'Latest Health Blogs',
+  sub: 'Practical health insights and updates from the Arova Labs journal.',
+};
