@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, Clock, Phone } from 'lucide-react';
-import { locations, locationsSection } from '../../data/about';
-import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
+import { Link } from "react-router-dom";
+import { ArrowUpRight, Clock, Phone } from "lucide-react";
+import { locations, locationsSection } from "../../data/about";
+import Reveal, { RevealGroup, RevealItem } from "../motion/Reveal";
 
 /*
  * The laboratories, as the page's closing roll-call.
@@ -15,7 +15,7 @@ import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
  * link through to the full finder.
  */
 
-const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, '')}`;
+const telHref = (phone) => `tel:${phone.replace(/[^\d+]/g, "")}`;
 
 export default function AboutLocations() {
   return (
@@ -24,7 +24,6 @@ export default function AboutLocations() {
         <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-12">
           <div className="max-w-xl">
             <p className="label-section mb-6 text-ink/35">
-              <span className="label-num">{String(locations.length).padStart(2, '0')}</span>
               {locationsSection.sub}
             </p>
             <h2 className="display-lg">{locationsSection.heading}</h2>
@@ -49,7 +48,9 @@ export default function AboutLocations() {
               className="flex flex-col border-b border-ink/12 py-7 md:px-6 md:odd:pl-0 lg:px-6 lg:[&:nth-child(3n+1)]:pl-0"
             >
               <div className="flex items-start justify-between gap-3">
-                <span className="label text-ink/25">{String(i + 1).padStart(2, '0')}</span>
+                <span className="label text-ink/25">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <span className="rounded-full bg-accent-light px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-dark">
                   {location.badge}
                 </span>

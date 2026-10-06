@@ -160,6 +160,246 @@
     background: color-mix(in oklab, var(--color-brand-light) 42%, white);
   }
 
+  /* ------------------------------------------------ Home collection feature */
+  .home-collection {
+    --hc-teal: #176f73;
+    --hc-deep: #125b60;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(3.5rem, 7vw, 7rem) clamp(1rem, 4vw, 4.5rem) 2rem;
+    color: #fff;
+    background: linear-gradient(118deg, var(--hc-deep), var(--hc-teal) 62%, #2b8582);
+  }
+
+  .home-collection__glow {
+    position: absolute;
+    z-index: -1;
+    top: -22rem;
+    right: 7%;
+    width: 55rem;
+    aspect-ratio: 1;
+    border: 1px solid rgb(255 255 255 / 9%);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3.5rem rgb(255 255 255 / 2%), 0 0 0 8rem rgb(255 255 255 / 1.5%);
+  }
+
+  .home-collection__hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(22rem, .83fr) minmax(0, 1.17fr);
+    align-items: center;
+    width: min(100%, 1660px);
+    min-height: clamp(32rem, 45vw, 45rem);
+    margin-inline: auto;
+  }
+
+  .home-collection__copy {
+    position: relative;
+    z-index: 3;
+    padding-block: 1.25rem 4.75rem;
+  }
+
+  .home-collection__title {
+    max-width: 47rem;
+    margin: 0;
+    color: #fff;
+    font-size: clamp(2.6rem, 5.4vw, 5.35rem);
+    font-weight: 720;
+    letter-spacing: -.055em;
+    line-height: .99;
+  }
+
+  .home-collection__title span { color: #a8e3df; }
+
+  .home-collection__intro {
+    max-width: 36rem;
+    margin: 1.2rem 0 0;
+    color: rgb(255 255 255 / 84%);
+    font-size: clamp(.98rem, 1.25vw, 1.18rem);
+    line-height: 1.65;
+  }
+
+  .home-collection__phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .home-collection__phone-icon {
+    display: grid;
+    width: 3.65rem;
+    height: 3.65rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--hc-teal);
+    transition: transform .25s ease;
+  }
+
+  .home-collection__phone:hover .home-collection__phone-icon { transform: scale(1.06); }
+  .home-collection__phone strong, .home-collection__phone small { display: block; }
+  .home-collection__phone strong { font-size: 1.28rem; line-height: 1.3; }
+  .home-collection__phone small { color: rgb(255 255 255 / 75%); font-size: .95rem; }
+
+  .home-collection__actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.1rem; }
+
+  .home-collection__button {
+    display: inline-flex;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    padding: .75rem 1.35rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: .92rem;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+  }
+
+  .home-collection__button:hover { transform: translateY(-2px); }
+  .home-collection__button--primary { background: #fff; color: var(--hc-deep); }
+  .home-collection__button--primary:hover { background: #fef3e2; }
+  .home-collection__button--outline { border-color: rgb(255 255 255 / 65%); color: #fff; }
+  .home-collection__button--outline:hover { background: #fff; color: var(--hc-deep); }
+
+  .home-collection__benefits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .7rem 1.25rem;
+    margin-top: 1.75rem;
+  }
+
+  .home-collection__benefits > span { display: flex; align-items: center; gap: .65rem; color: rgb(255 255 255 / 91%); font-size: .82rem; line-height: 1.4; }
+  .home-collection__benefits svg { width: 2.65rem; height: 2.65rem; flex: 0 0 auto; padding: .57rem; border-radius: 50%; background: rgb(160 231 225 / 20%); color: #e8fffc; }
+
+  .home-collection__visual {
+    position: relative;
+    z-index: 1;
+    width: calc(100% + clamp(0rem, 3vw, 3rem));
+    margin-left: clamp(-2.5rem, -2vw, -1rem);
+    align-self: stretch;
+    min-height: 31rem;
+  }
+
+  .home-collection__halo {
+    position: absolute;
+    inset: 7% -4% 7% 2%;
+    border: 1px solid rgb(180 239 232 / 24%);
+    border-radius: 53% 47% 0 0 / 43% 54% 0 0;
+    transform: rotate(-3deg);
+  }
+
+  .home-collection__frame {
+    position: absolute;
+    inset: 0 -5% 3% 5%;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 30%);
+    border-radius: 48% 0 0 0 / 42% 0 0 0;
+    background: #d7e8e5;
+    box-shadow: 0 30px 70px rgb(3 37 39 / 25%);
+  }
+
+  .home-collection__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .home-collection__frame-accent {
+    position: absolute;
+    z-index: 1;
+    right: -5%;
+    bottom: -1%;
+    width: 22%;
+    height: 17%;
+    border-radius: 50% 0 0;
+    background: rgb(66 167 161 / 48%);
+    pointer-events: none;
+  }
+
+  .home-collection__steps-wrap {
+    position: relative;
+    z-index: 5;
+    width: min(100%, 1660px);
+    margin: -3.15rem auto 0;
+  }
+
+  .home-collection__steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+    padding: 1.75rem 1.1rem;
+    border: 1px solid rgb(20 100 103 / 10%);
+    border-radius: 1.45rem;
+    background: rgb(255 255 255 / 97%);
+    box-shadow: 0 18px 54px rgb(9 57 58 / 16%);
+    list-style: none;
+  }
+
+  .home-collection__step { position: relative; display: grid; grid-template-columns: 1fr; grid-template-rows: 3.5rem auto; align-items: center; gap: .35rem; padding: .35rem clamp(.45rem, 1.5vw, 1.5rem); color: var(--color-ink); }
+  .home-collection__step-number { display: grid; width: 3.25rem; height: 3.25rem; place-items: center; border: 1px solid #ceeeeb; border-radius: 50%; background: #e9f8f6; color: var(--hc-teal); font-size: 1.12rem; font-weight: 700; }
+  .home-collection__step-number { align-self: center; justify-self: center; }
+  .home-collection__step-copy { grid-column: 1; align-self: start; padding-inline: .25rem; text-align: center; }
+  .home-collection__step-copy strong { display: block; color: #122a45; font-size: clamp(.92rem, 1.2vw, 1.16rem); font-weight: 700; line-height: 1.3; }
+  .home-collection__step-copy small { display: block; max-width: 17rem; margin: .35rem auto 0; color: #50677a; font-size: .9rem; line-height: 1.5; }
+  .home-collection__connector { position: absolute; top: 1.55rem; right: -.62rem; color: #2d9b9c; stroke-dasharray: 2 3; }
+
+  @media (min-width: 1700px) {
+    .home-collection__hero { min-height: 47rem; }
+    .home-collection__title { font-size: clamp(5rem, 5vw, 6.3rem); }
+  }
+
+  @media (max-width: 1100px) {
+    .home-collection { padding-inline: clamp(1rem, 3vw, 2rem); }
+    .home-collection__hero { grid-template-columns: minmax(19rem, .9fr) minmax(0, 1.1fr); min-height: 35rem; }
+    .home-collection__title { font-size: clamp(2.8rem, 5.1vw, 4.35rem); }
+    .home-collection__visual { min-height: 31rem; margin-left: -1.7rem; }
+    .home-collection__benefits { gap: .7rem; }
+    .home-collection__benefits > span { font-size: .76rem; }
+    .home-collection__steps { padding-inline: .45rem; }
+    .home-collection__step { padding-inline: .35rem; }
+    .home-collection__step-number { width: 2.65rem; height: 2.65rem; }
+  }
+
+  @media (max-width: 760px) {
+    .home-collection { padding: 3.5rem 1rem 1.25rem; }
+    .home-collection__hero { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
+    .home-collection__copy { order: 1; padding: 0 0 1rem; }
+    .home-collection__title { max-width: 35rem; font-size: clamp(2.65rem, 10vw, 4rem); }
+    .home-collection__intro { max-width: 35rem; margin-top: .9rem; }
+    .home-collection__phone { margin-top: 1rem; }
+    .home-collection__phone-icon { width: 3.2rem; height: 3.2rem; }
+    .home-collection__phone strong { font-size: 1.15rem; }
+    .home-collection__actions { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+    .home-collection__button { min-height: 3.1rem; padding-inline: .75rem; font-size: .82rem; }
+    .home-collection__benefits { display: none; }
+    .home-collection__visual { order: 2; width: 100%; min-height: 0; height: clamp(16rem, 76vw, 25rem); margin: .5rem 0 0; }
+    .home-collection__frame { inset: 0; border-radius: 1.4rem; }
+    .home-collection__photo { object-position: 48% center; }
+    .home-collection__halo { inset: -.45rem -.35rem .45rem .35rem; border-radius: 1.7rem; }
+    .home-collection__steps-wrap { margin-top: -.75rem; }
+    .home-collection__steps { grid-template-columns: 1fr; padding: .75rem 1rem; border-radius: 1.2rem; }
+    .home-collection__step { grid-template-columns: 3.1rem 1fr; grid-template-rows: auto; gap: .7rem; padding: 1rem .15rem; text-align: left; }
+    .home-collection__step-number { width: 2.8rem; height: 2.8rem; }
+    .home-collection__step-number { align-self: center; justify-self: start; }
+    .home-collection__step-copy { grid-column: 2; text-align: left; }
+    .home-collection__step-copy small { margin: .25rem 0 0; }
+    .home-collection__connector { top: auto; right: auto; bottom: -.62rem; left: 1.4rem; transform: rotate(90deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-collection__button, .home-collection__phone-icon { transition: none; }
+  }
+
   /*
    * Hairline column rules, drawn as a background layer so they land on the
    * section itself rather than needing empty grid children. They are what make

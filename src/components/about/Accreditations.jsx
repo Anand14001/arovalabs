@@ -17,10 +17,7 @@ export default function Accreditations() {
     <section className="section-lg">
       <div className="shell">
         <Reveal className="max-w-2xl">
-          <p className="label-section mb-6 text-ink/35">
-            <span className="label-num">03</span>
-            Accreditation
-          </p>
+          <p className="label-section mb-6 text-ink/35">Accreditation</p>
           <h2 className="display-lg">{accreditations.heading}</h2>
         </Reveal>
 

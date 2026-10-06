@@ -28,10 +28,7 @@ export default function LeadershipStory() {
     <section id="story" className="section-lg scroll-mt-24 band-wash">
       <div className="shell">
         <Reveal className="max-w-2xl">
-          <p className="label-section mb-6 text-ink/35">
-            <span className="label-num">02</span>
-            {leadership.heading}
-          </p>
+          <p className="label-section mb-6 text-ink/35">{leadership.heading}</p>
           <h2 className="display-lg">{leadership.name}</h2>
           <p className="mt-3 text-[15px] font-semibold text-brand">
             {leadership.role}
