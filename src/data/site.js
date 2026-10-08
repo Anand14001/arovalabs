@@ -44,13 +44,6 @@ export const footerLegalLinks = [
   { label: 'Contact Us', to: '/contact-us/' },
 ];
 
-export const newsletter = {
-  heading: 'Join Newsletter',
-  sub: 'Get weekly health tips and lab updates.',
-  placeholder: 'Email',
-  button: 'Submit',
-};
-
 // Elementor popup 631 on the reference site.
 export const loginPopup = {
   heading: 'Welcome to Arova Labs',

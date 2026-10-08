@@ -225,13 +225,6 @@ const browser = await chromium.launch();
     descOrder.slice(0, 2).join(' | '),
   );
 
-  // --- Newsletter form
-  await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  await page.locator('#newsletter-email').fill('test@example.com');
-  await page.locator('#newsletter-email').locator('..').getByRole('button', { name: 'Submit' }).click();
-  await page.waitForTimeout(300);
-  check('Newsletter reports success locally', (await page.getByText(/Thanks for subscribing/).count()) > 0);
-
   // --- Contact form
   await page.goto(BASE + '/contact-us/', { waitUntil: 'networkidle' });
   await page.locator('#contact-email').fill('test@example.com');

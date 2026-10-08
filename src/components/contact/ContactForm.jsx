@@ -2,27 +2,13 @@ import { useRef, useState } from 'react';
 import { AlertCircle, ArrowRight, Check, Loader2 } from 'lucide-react';
 import { contactPage } from '../../data/pages';
 import { contact } from '../../data/site';
+import { api, ApiError } from '../../lib/api';
 
 /*
  * The enquiry form, rendered inside the hero beside the photograph.
  *
- * The reference site posts this to Elementor Pro's form handler. There is no
- * backend in this project (AUDIT.md §5), so submission resolves locally and
- * says so plainly rather than pretending to have sent anything. The field names
- * keep Elementor's `form_fields[...]` convention, so wiring a real endpoint
- * later is a one-line change in `submit()` and nothing else moves.
- *
- * Validation runs on submit, then live on any field already carrying an error —
- * validating every keystroke from the first character means telling someone
- * their email is invalid while they are still typing the first letter of it.
- *
- * Errors are carried by three signals, never colour alone: the field's ring
- * turns accent, an icon appears, and the message is wired to the input through
- * `aria-describedby` with `aria-invalid` set.
- *
- * Two fields are additions to the reference form, both flagged in the summary:
- * a phone number, because a diagnostics lab calls people back, and an enquiry
- * type whose options are the site's own services.
+ * Connected directly to the backend POST /api/v1/contact endpoint.
+ * Includes rate limit handling, field error mapping, and honeypot protection.
  */
 
 const TOPICS = ['Tests', 'Packages', 'Home Collection', 'Reports', 'Other'];
@@ -44,18 +30,22 @@ function validate(values) {
   return errors;
 }
 
-const EMPTY = { name: '', phone: '', email: '', topic: TOPICS[0], message: '' };
+const EMPTY = { name: '', phone: '', email: '', topic: TOPICS[0], message: '', website_hp: '' };
 
 export default function ContactForm() {
   const [values, setValues] = useState(EMPTY);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState('idle'); // idle | submitting | sent
+  const [serverError, setServerError] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | submitting | sent | error
   const formRef = useRef(null);
 
   const update = (name) => (event) => {
     const next = { ...values, [name]: event.target.value };
     setValues(next);
-    if (status === 'sent') setStatus('idle');
+    if (status === 'sent' || status === 'error') {
+      setStatus('idle');
+      setServerError('');
+    }
 
     // Re-validate only fields already carrying an error, so a message clears as
     // soon as it is fixed without new ones appearing mid-typing.
@@ -67,6 +57,7 @@ export default function ContactForm() {
 
   const submit = async (event) => {
     event.preventDefault();
+    setServerError('');
 
     const found = validate(values);
     setErrors(found);
@@ -78,11 +69,40 @@ export default function ContactForm() {
     }
 
     setStatus('submitting');
-    // Stands in for the POST the reference site makes. No network call is
-    // fabricated — see the note under the button.
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    setStatus('sent');
-    setValues(EMPTY);
+
+    try {
+      await api.submitContact({
+        name: values.name.trim() || undefined,
+        email: values.email.trim(),
+        phone: values.phone.trim() || undefined,
+        topic: values.topic,
+        message: values.message.trim(),
+        website_hp: values.website_hp || undefined,
+        source: 'contact_page',
+      });
+      setStatus('sent');
+      setValues(EMPTY);
+      setErrors({});
+    } catch (err) {
+      setStatus('error');
+      if (err instanceof ApiError) {
+        if (err.status === 422 && err.fields) {
+          setErrors(err.fields);
+          const firstField = Object.keys(err.fields)[0];
+          if (firstField) {
+            formRef.current?.querySelector(`[name="form_fields[${firstField}]"]`)?.focus();
+          }
+          return;
+        }
+        if (err.status === 429) {
+          setServerError('Too many enquiries submitted recently. Please try again later or call us directly.');
+          return;
+        }
+        setServerError(err.message || 'Something went wrong while sending your enquiry.');
+      } else {
+        setServerError('Network connection issue. Please check your internet and try again.');
+      }
+    }
   };
 
   const busy = status === 'submitting';
@@ -158,6 +178,18 @@ export default function ContactForm() {
         />
       </div>
 
+      {/* Honeypot anti-spam field: hidden from real visitors */}
+      <div className="hidden" aria-hidden="true">
+        <input
+          type="text"
+          name="website_hp"
+          tabIndex="-1"
+          autoComplete="off"
+          value={values.website_hp}
+          onChange={update('website_hp')}
+        />
+      </div>
+
       <button
         type="submit"
         disabled={busy}
@@ -193,9 +225,14 @@ export default function ContactForm() {
           <p className="mt-5 flex items-start gap-3 rounded-xl bg-brand-light px-4 py-3.5 text-sm text-brand">
             <Check size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span>
-              Thanks — your message has been recorded. (Demo only — no backend is
-              connected.)
+              Thank you! Your enquiry has been received. Our diagnostics team will contact you shortly.
             </span>
+          </p>
+        )}
+        {status === 'error' && serverError && (
+          <p className="mt-5 flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3.5 text-sm text-red-700">
+            <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <span>{serverError}</span>
           </p>
         )}
       </div>

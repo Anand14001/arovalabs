@@ -2,26 +2,20 @@ import { Link } from 'react-router-dom';
 import { useLenis } from 'lenis/react';
 import { ArrowUp, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { contact, footerLegalLinks, footerQuickLinks, site } from '../data/site';
-import Newsletter from './Newsletter';
 
 /*
  * Site footer.
  *
  * The teal is the reference footer's own (#2B7E83, confirmed in Elementor's
- * post-339.css) and stays. What changes is that it is no longer four equal
- * columns of small text, which gave the brand statement, a list of five links,
- * a block of contact details and a signup form exactly the same weight.
+ * post-339.css) and stays.
  *
- * It now closes the page in three movements:
+ * Closes the page in three movements:
  *
- *   1. Sign-off — the logo and the positioning line set large, with the signup
- *      opposite it. This is the last thing a visitor reads, so it gets to be a
- *      statement rather than the first of four columns.
- *   2. Directory — links and contact routes below a hairline, at the size
- *      reference material should be.
+ *   1. Sign-off — the logo and brand positioning statement.
+ *   2. Directory — links and contact routes below a hairline.
  *   3. Legal strip — copyright, policies and a return to the top.
  *
- * Every string, link and phone number the old footer carried is still here.
+ * Every string, link and phone number the footer carried is still here.
  */
 export default function Footer() {
   const lenis = useLenis();
@@ -35,20 +29,14 @@ export default function Footer() {
     <footer className="band-brand">
       <div className="shell pb-10 pt-16 sm:pt-20">
         {/* ------------------------------------------------- 1. sign-off */}
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-6">
-            {/*
-              The white logo SVG paints from a rect that overflows its own
-              viewBox, so the wordmark fills barely a third of the box. It needs
-              a taller box than the header logo to read at the same size.
-            */}
-            <img src={site.logoWhite} alt={site.title} className="-ml-2 h-20 w-auto" />
-            <p className="display-md mt-8 max-w-lg text-white">{site.tagline}</p>
-          </div>
-
-          <div className="lg:col-span-5 lg:col-start-8">
-            <Newsletter />
-          </div>
+        <div>
+          {/*
+            The white logo SVG paints from a rect that overflows its own
+            viewBox, so the wordmark fills barely a third of the box. It needs
+            a taller box than the header logo to read at the same size.
+          */}
+          <img src={site.logoWhite} alt={site.title} className="-ml-2 h-20 w-auto" />
+          <p className="display-md mt-6 max-w-2xl text-white">{site.tagline}</p>
         </div>
 
         {/* ------------------------------------------------ 2. directory */}

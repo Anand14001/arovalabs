@@ -10,19 +10,31 @@ const BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:4100').repla
 const PREFIX = '/api/v1';
 
 export class ApiError extends Error {
-  constructor(status, code, message) {
+  constructor(status, code, message, fields) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.fields = fields ?? null;
+  }
+
+  get fieldErrors() {
+    return this.fields ?? {};
   }
 }
 
-const request = async (path, { signal } = {}) => {
+const request = async (path, { method = 'GET', body, headers, signal } = {}) => {
   let res;
   try {
+    const isJsonBody = body && typeof body === 'object' && !(body instanceof FormData);
     res = await fetch(`${BASE_URL}${PREFIX}${path}`, {
-      headers: { Accept: 'application/json' },
+      method,
+      headers: {
+        Accept: 'application/json',
+        ...(isJsonBody ? { 'Content-Type': 'application/json' } : {}),
+        ...headers,
+      },
+      body: isJsonBody ? JSON.stringify(body) : body,
       signal,
     });
   } catch (err) {
@@ -33,17 +45,18 @@ const request = async (path, { signal } = {}) => {
   }
 
   const text = await res.text();
-  const body = text ? JSON.parse(text) : null;
+  const payload = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
     throw new ApiError(
       res.status,
-      body?.error?.code ?? 'UNKNOWN',
-      body?.error?.message ?? `Request failed (${res.status}).`,
+      payload?.error?.code ?? 'UNKNOWN',
+      payload?.error?.message ?? `Request failed (${res.status}).`,
+      payload?.error?.fields,
     );
   }
 
-  return body;
+  return payload;
 };
 
 const qs = (params) => {
@@ -61,6 +74,11 @@ export const api = {
   related: (slug) => request(`/products/${encodeURIComponent(slug)}/related`),
   categories: () => request('/categories'),
   tags: () => request('/tags'),
+  submitContact: (data) =>
+    request('/contact', {
+      method: 'POST',
+      body: data,
+    }),
 };
 
 export { BASE_URL };
