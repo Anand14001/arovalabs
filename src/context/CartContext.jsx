@@ -6,51 +6,94 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react";
-import { getProductById } from "../data/products";
+} from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { cartApi, readToken, writeToken } from '../lib/commerce';
 
 /*
- * Client-side cart only.
+ * Cart.
  *
- * The reference site runs WooCommerce: `?add-to-cart=<id>` posts to the server,
- * which persists the cart in a PHP session and drives checkout + payment. None of
- * that backend is reachable from this recreation, so the cart is kept in React
- * state and mirrored into localStorage — that keeps it alive across navigations
- * and reloads, the way the server session does on the reference site.
+ * Server-owned. The browser holds an opaque token and nothing else; quantities
+ * go up to the API and every price and total comes back from it. A cart whose
+ * prices live in localStorage is a cart that shows yesterday's prices and can be
+ * edited with devtools — neither is acceptable for something that ends in a
+ * payment.
  *
- * Nothing here places an order or takes a payment, and /checkout/ says so
- * explicitly rather than implying a booking succeeded.
+ * The shape exposed here is deliberately the same as the old client-side cart's
+ * — `items[].product` carrying rupee prices — so the cart page, line items and
+ * summary did not have to be rewritten around a new contract. The translation
+ * from the API's paise happens once, below.
  */
 
 const CartContext = createContext(null);
-const STORAGE_KEY = "arova-cart";
 
-// localStorage can throw (private mode, blocked site data), so every access is guarded.
-function readStoredCart() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((i) => i && getProductById(i.id))
-      .map((i) => ({
-        id: Number(i.id),
-        quantity: Math.max(1, Number(i.quantity) || 1),
-      }));
-  } catch {
-    return [];
-  }
-}
+const CART_KEY = ['cart'];
+
+/** API cart line → the shape the existing cart components render. */
+const toItem = (line) => ({
+  // `id` stays the product id because that is what call sites pass to addItem
+  // and what the cart page keys on; the cart-line id is carried separately.
+  id: line.productId,
+  itemId: line.id,
+  quantity: line.quantity,
+  product: {
+    id: line.productId,
+    slug: line.slug,
+    title: line.title,
+    type: line.type === 'PACKAGE' ? 'package' : 'test',
+    salePrice: line.unitPriceRupees,
+    regularPrice: line.regularPrice / 100,
+    discount: line.discountLabel,
+    archiveImage: line.image,
+    cardImage: line.image,
+  },
+  priceChanged: line.priceChanged,
+  unavailable: line.unavailable,
+});
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState(readStoredCart);
+  const qc = useQueryClient();
+  const [token, setToken] = useState(readToken);
+
+  const query = useQuery({
+    queryKey: CART_KEY,
+    queryFn: () => cartApi.get(token),
+    enabled: Boolean(token),
+    retry: false,
+    staleTime: 10_000,
+  });
 
   /*
-   * Cart additions raise a toast from here rather than from each call site, so
-   * every path that adds something — product cards, the product page, the
-   * catalogue rows, the cart's own suggestions — confirms itself without
-   * having to remember to.
+   * A token that no longer resolves — expired, or already turned into an order —
+   * is discarded so the next add starts a fresh cart instead of failing forever.
+   */
+  useEffect(() => {
+    if (query.error && [404, 409].includes(query.error.status)) {
+      writeToken(null);
+      setToken(null);
+      qc.removeQueries({ queryKey: CART_KEY });
+    }
+  }, [query.error, qc]);
+
+  const cart = query.data?.cart ?? null;
+
+  const applyResult = useCallback(
+    (data) => {
+      const next = data.cart;
+      if (next.token !== token) {
+        writeToken(next.token);
+        setToken(next.token);
+      }
+      qc.setQueryData(CART_KEY, data);
+      return next;
+    },
+    [qc, token],
+  );
+
+  /*
+   * Toasts are raised here rather than at each call site, so every path that
+   * adds something — product cards, the detail page, the catalogue rows, the
+   * cart's own suggestions — confirms itself without having to remember to.
    */
   const [toasts, setToasts] = useState([]);
   const toastTimers = useRef(new Map());
@@ -61,7 +104,6 @@ export function CartProvider({ children }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Clear every pending timer if the provider ever unmounts.
   useEffect(
     () => () => {
       toastTimers.current.forEach(clearTimeout);
@@ -70,94 +112,126 @@ export function CartProvider({ children }) {
     [],
   );
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Storage unavailable — the cart still works for this page view.
-    }
-  }, [items]);
-
-  const addItem = useCallback(
-    (productId, quantity = 1, { notify = true } = {}) => {
-      const product = getProductById(productId);
-      if (!product) return;
-      setItems((prev) => {
-        const existing = prev.find((i) => i.id === product.id);
-        if (existing) {
-          return prev.map((i) =>
-            i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
-          );
-        }
-        return [...prev, { id: product.id, quantity }];
-      });
-
-      if (!notify) return;
-
-      const id = `${product.id}-${Date.now()}`;
+  const raiseToast = useCallback(
+    (title, price) => {
+      const id = `${title}-${Date.now()}`;
       // Only ever one toast on screen: a stack of them is noise, and the latest
       // addition is the only one anybody is looking for.
       setToasts((prev) => {
         prev.forEach((t) => clearTimeout(toastTimers.current.get(t.id)));
         toastTimers.current.clear();
-        return [
-          { id, title: product.title, price: product.salePrice * quantity },
-        ];
+        return [{ id, title, price }];
       });
-
-      toastTimers.current.set(
-        id,
-        setTimeout(() => dismissToast(id), 4000),
-      );
+      toastTimers.current.set(id, setTimeout(() => dismissToast(id), 4000));
     },
     [dismissToast],
   );
 
-  const removeItem = useCallback((productId) => {
-    setItems((prev) => prev.filter((i) => i.id !== productId));
-  }, []);
+  const addMutation = useMutation({
+    mutationFn: ({ productId, quantity }) => cartApi.addItem(token, productId, quantity),
+  });
 
-  const setQuantity = useCallback((productId, quantity) => {
-    const qty = Math.max(1, Number(quantity) || 1);
-    setItems((prev) =>
-      prev.map((i) => (i.id === productId ? { ...i, quantity: qty } : i)),
-    );
-  }, []);
+  const addItem = useCallback(
+    async (productId, quantity = 1, { notify = true } = {}) => {
+      const data = await addMutation.mutateAsync({ productId, quantity });
+      const next = applyResult(data);
+      if (notify) {
+        const line = next.items.find((i) => i.productId === productId);
+        if (line) raiseToast(line.title, line.unitPriceRupees * quantity);
+      }
+      return next;
+    },
+    [addMutation, applyResult, raiseToast],
+  );
 
-  const clear = useCallback(() => setItems([]), []);
+  const setQuantity = useCallback(
+    async (productId, quantity) => {
+      const line = cart?.items.find((i) => i.productId === productId);
+      if (!line) return;
+      applyResult(await cartApi.setQuantity(token, line.id, Math.max(0, Number(quantity) || 0)));
+    },
+    [cart, token, applyResult],
+  );
+
+  const removeItem = useCallback(
+    async (productId) => {
+      const line = cart?.items.find((i) => i.productId === productId);
+      if (!line) return;
+      applyResult(await cartApi.removeItem(token, line.id));
+    },
+    [cart, token, applyResult],
+  );
+
+  const clear = useCallback(async () => {
+    if (!token) return;
+    applyResult(await cartApi.clear(token));
+  }, [token, applyResult]);
+
+  const applyCoupon = useCallback(
+    async (code) => applyResult(await cartApi.applyCoupon(token, code)),
+    [token, applyResult],
+  );
+
+  const removeCoupon = useCallback(
+    async () => applyResult(await cartApi.removeCoupon(token)),
+    [token, applyResult],
+  );
+
+  /** Called after checkout converts the cart, so the UI empties immediately. */
+  const reset = useCallback(() => {
+    writeToken(null);
+    setToken(null);
+    qc.removeQueries({ queryKey: CART_KEY });
+  }, [qc]);
 
   const value = useMemo(() => {
-    const detailed = items
-      .map((i) => {
-        const product = getProductById(i.id);
-        return product ? { ...i, product } : null;
-      })
-      .filter(Boolean);
-
-    const count = detailed.reduce((sum, i) => sum + i.quantity, 0);
-    const total = detailed.reduce(
-      (sum, i) => sum + i.product.salePrice * i.quantity,
-      0,
-    );
+    const items = (cart?.items ?? []).map(toItem);
 
     return {
-      items: detailed,
-      count,
-      total,
+      items,
+      count: cart?.count ?? 0,
+      // Rupees, matching what the cart components have always rendered.
+      total: (cart?.totals?.total ?? 0) / 100,
+      // The server's full breakdown, for checkout.
+      totals: cart?.totals ?? null,
+      coupon: cart?.coupon ?? null,
+      couponProblem: cart?.couponProblem ?? null,
+      token,
+      isLoading: Boolean(token) && query.isLoading,
+      isSyncing: addMutation.isPending,
+
       addItem,
       removeItem,
       setQuantity,
       clear,
+      applyCoupon,
+      removeCoupon,
+      reset,
+
       toasts,
       dismissToast,
     };
-  }, [items, addItem, removeItem, setQuantity, clear, toasts, dismissToast]);
+  }, [
+    cart,
+    token,
+    query.isLoading,
+    addMutation.isPending,
+    addItem,
+    removeItem,
+    setQuantity,
+    clear,
+    applyCoupon,
+    removeCoupon,
+    reset,
+    toasts,
+    dismissToast,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside <CartProvider>");
+  if (!ctx) throw new Error('useCart must be used inside <CartProvider>');
   return ctx;
 }

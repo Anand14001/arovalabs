@@ -2,8 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import ArticleIndex from '../components/blog/ArticleIndex';
 import Reveal from '../components/motion/Reveal';
-import { blogs, getBlogsByCategory } from '../data/blogs';
-import { blogCategories, getBlogCategoryBySlug } from '../data/taxonomies';
+import { usePosts, useBlogCategories } from '../lib/blog';
 import { blogSection } from '../data/homepage';
 
 /*
@@ -24,13 +23,19 @@ import { blogSection } from '../data/homepage';
  */
 export default function BlogCategory() {
   const { slug } = useParams();
-  const category = getBlogCategoryBySlug(slug);
-  const posts = getBlogsByCategory(slug);
-  const name = category ? category.name : slug;
+  const { categories } = useBlogCategories();
+  const { posts, isLoading } = usePosts({ category: slug });
 
-  const populated = blogCategories
-    .map((c) => ({ ...c, count: getBlogsByCategory(c.slug).length }))
-    .filter((c) => c.count > 0);
+  const category = categories.find((c) => c.slug === slug);
+  const name = category ? category.name : slug;
+  // Only categories that actually hold something: a filter leading to an empty
+  // page is a dead end, and the API already counts them.
+  const blogCategories = categories.filter((c) => c.postCount > 0);
+  const totalElsewhere = categories
+    .filter((c) => c.slug !== slug)
+    .reduce((sum, c) => sum + c.postCount, 0);
+
+  const populated = blogCategories.map((c) => ({ ...c, count: c.postCount }));
 
   return (
     <>
@@ -85,8 +90,8 @@ export default function BlogCategory() {
             <Reveal className="py-16 text-center">
               <p className="display-md text-ink">No posts found in this category.</p>
               <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-body">
-                {blogs.length} {blogs.length === 1 ? 'article is' : 'articles are'} published
-                across the other categories.
+                {totalElsewhere} {totalElsewhere === 1 ? 'article is' : 'articles are'}{' '}
+                published across the other categories.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

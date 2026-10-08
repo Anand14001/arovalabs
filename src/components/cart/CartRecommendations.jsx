@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { carouselSections } from '../../data/homepage';
-import { formatPrice, frequentlyBookedTests } from '../../data/products';
+import { formatPrice } from '../../lib/money';
+import { useCuratedProducts } from '../../lib/catalog';
 import { useCart } from '../../context/CartContext';
 import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
 
@@ -18,9 +19,10 @@ import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
  */
 export default function CartRecommendations() {
   const { items, addItem } = useCart();
+  const { items: booked } = useCuratedProducts('frequentlyBookedTests');
 
   const inCart = new Set(items.map((i) => i.id));
-  const suggestions = frequentlyBookedTests.filter((p) => p && !inCart.has(p.id)).slice(0, 3);
+  const suggestions = booked.filter((p) => p && !inCart.has(p.id)).slice(0, 3);
 
   if (suggestions.length === 0) return null;
 

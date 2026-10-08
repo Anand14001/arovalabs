@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ShoppingBag } from 'lucide-react';
 import { emptyCart } from '../../data/pages';
-import { productTags } from '../../data/taxonomies';
+import { useProducts, useTags } from '../../lib/catalog';
 import { carouselSections } from '../../data/homepage';
 import Reveal, { RevealGroup, RevealItem } from '../motion/Reveal';
 import { organHref } from '../../lib/listingRoutes';
@@ -19,6 +19,8 @@ import { organHref } from '../../lib/listingRoutes';
  * mid-session should not feel like an error screen.
  */
 export default function EmptyCart() {
+  const { tags } = useTags();
+  const { products } = useProducts();
   return (
     <div className="shell section-lg">
       <Reveal className="mx-auto max-w-xl text-center">
@@ -59,10 +61,10 @@ export default function EmptyCart() {
         stagger={0.05}
         className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
       >
-        {productTags.map((tag) => (
+        {tags.map((tag) => (
           <RevealItem as="li" key={tag.slug} y={14} className="flex">
             <Link
-              to={organHref(tag.slug)}
+              to={organHref(tag.slug, products)}
               className="card card-interactive group flex w-full items-center gap-3 p-4"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-light transition-colors duration-300 group-hover:bg-brand">

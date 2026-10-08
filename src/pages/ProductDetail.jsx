@@ -6,10 +6,11 @@ import ProductCarousel from '../components/ProductCarousel';
 import SectionHeading from '../components/SectionHeading';
 import FAQ from '../components/FAQ';
 import { useCart } from '../context/CartContext';
+import { formatPrice } from '../lib/money';
+import { useProduct, useRelated } from '../lib/catalog';
+// Still static: these blocks are site settings and move to the API with the
+// content step, not the catalogue one.
 import {
-  formatPrice,
-  getProductBySlug,
-  getSimilarProducts,
   productAssurance,
   productBenefits,
   slotsNotice,
@@ -29,10 +30,47 @@ import {
  */
 export default function ProductDetail() {
   const { slug } = useParams();
-  const product = getProductBySlug(slug);
+  const { product, isLoading, isError, error } = useProduct(slug);
+  const { items: related } = useRelated(slug);
   const { addItem } = useCart();
 
-  if (!product) return <Navigate to="/404" replace />;
+  /*
+   * Three outcomes, kept distinct. Loading shows the page's shape; a 404 is a
+   * real missing product and redirects as before; anything else is the API
+   * being unreachable, which must not look like "this test does not exist".
+   */
+  if (isLoading) {
+    return (
+      <div className="shell py-16" aria-busy="true" aria-label="Loading">
+        <div className="h-4 w-64 animate-pulse rounded bg-ink/[0.06]" />
+        <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="space-y-4">
+            <div className="h-9 w-2/3 animate-pulse rounded bg-ink/[0.06]" />
+            <div className="h-24 animate-pulse rounded bg-ink/[0.04]" />
+            <div className="h-64 animate-pulse rounded-2xl bg-ink/[0.04]" />
+          </div>
+          <div className="h-80 animate-pulse rounded-2xl bg-ink/[0.04]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError && error?.status === 404) return <Navigate to="/404" replace />;
+
+  if (isError || !product) {
+    return (
+      <div className="shell py-24 text-center">
+        <h1 className="display-md text-ink">We couldn’t load this test.</h1>
+        <p className="section-sub mx-auto mt-2 max-w-md">
+          This is usually temporary. Reload the page, or call us on{' '}
+          <a href="tel:9442218998" className="text-brand underline">
+            9442218998
+          </a>{' '}
+          to book over the phone.
+        </p>
+      </div>
+    );
+  }
 
   const isPackage = product.type === 'package';
 
@@ -275,7 +313,7 @@ export default function ProductDetail() {
           <SectionHeading heading="Similar Tests You Might Need" />
           <div className="mt-8">
             <ProductCarousel
-              products={getSimilarProducts(product)}
+              products={related}
               variant={isPackage ? 'package' : 'test'}
             />
           </div>

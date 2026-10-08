@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { blogSection } from '../data/homepage';
-import { blogs } from '../data/blogs';
+import { usePosts } from '../lib/blog';
 import SectionHeading from './SectionHeading';
 import { decodeEntities } from '../lib/text';
 
@@ -31,6 +31,8 @@ import { decodeEntities } from '../lib/text';
  * All of it is skipped under `prefers-reduced-motion`.
  */
 export default function BlogSection() {
+  // The three most recent articles, straight from the API.
+  const { posts: blogs } = usePosts({ limit: 3 });
   const listRef = useRef(null);
   const reduced = useReducedMotion();
 

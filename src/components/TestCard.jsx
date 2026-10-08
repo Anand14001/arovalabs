@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { formatPrice } from '../data/products';
+import { formatPrice } from '../lib/money';
 import { useCart } from '../context/CartContext';
 
 /*

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Check, Clock, Link2, Phone } from 'lucide-react';
-import { blogs, getBlogBySlug } from '../data/blogs';
+import { usePost } from '../lib/blog';
 import { quickActions } from '../data/homepage';
 import useArticleContent from '../components/blog/useArticleContent';
 import TableOfContents from '../components/blog/TableOfContents';
@@ -36,15 +36,41 @@ const formatDate = (iso) =>
  */
 export default function BlogPost() {
   const { slug } = useParams();
-  const post = getBlogBySlug(slug);
+  const { post, prev, next, isLoading, isError, error } = usePost(slug);
 
   // Hooks must run before any early return, so this is called unconditionally.
   const { lead, html, headings, minutes } = useArticleContent(post?.content ?? '');
   const [copied, setCopied] = useState(false);
 
-  if (!post) return <Navigate to="/404" replace />;
+  if (isLoading) {
+    return (
+      <div className="shell py-20" aria-busy="true" aria-label="Loading article">
+        <div className="mx-auto max-w-2xl space-y-4">
+          <div className="h-4 w-32 animate-pulse rounded bg-ink/[0.06]" />
+          <div className="h-10 w-3/4 animate-pulse rounded bg-ink/[0.06]" />
+          <div className="h-64 animate-pulse rounded-2xl bg-ink/[0.04]" />
+        </div>
+      </div>
+    );
+  }
 
-  const related = blogs.filter((b) => b.slug !== post.slug);
+  // A real 404 redirects; anything else is the API being unreachable, which
+  // must not be presented as "this article does not exist".
+  if (isError && error?.status === 404) return <Navigate to="/404" replace />;
+
+  if (isError || !post) {
+    return (
+      <div className="shell py-24 text-center">
+        <h1 className="display-md text-ink">We couldn’t load this article.</h1>
+        <p className="section-sub mx-auto mt-2 max-w-md">
+          This is usually temporary — please try again in a moment.
+        </p>
+      </div>
+    );
+  }
+
+  // The API gives the neighbouring articles rather than everything else.
+  const related = [prev, next].filter(Boolean);
   const [, call] = quickActions;
 
   const copyLink = async () => {

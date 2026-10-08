@@ -11,11 +11,7 @@ import Testimonials from '../components/Testimonials';
 import BlogSection from '../components/BlogSection';
 import FAQ from '../components/FAQ';
 import { carouselSections, homeFaqs } from '../data/homepage';
-import {
-  frequentlyBookedPackages,
-  frequentlyBookedTests,
-  mostPrescribedTests,
-} from '../data/products';
+import { useCuratedProducts } from '../lib/catalog';
 
 /*
  * Homepage.
@@ -61,6 +57,13 @@ import {
  * See AUDIT.md §2 and §3.
  */
 export default function Home() {
+  /*
+   * The three curated product rails. All three read the same cached catalogue
+   * query, so the homepage makes one request for products, not three.
+   */
+  const { items: frequentlyBookedTests } = useCuratedProducts('frequentlyBookedTests');
+  const { items: frequentlyBookedPackages } = useCuratedProducts('frequentlyBookedPackages');
+  const { items: mostPrescribedTests } = useCuratedProducts('mostPrescribedTests');
   return (
     <>
       {/* ---------------------------------------------- 1. act now --------- */}

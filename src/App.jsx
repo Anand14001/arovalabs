@@ -12,8 +12,9 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import MyAccount from './pages/MyAccount';
 import UploadPrescription from './pages/UploadPrescription';
+import BookingConfirmation from './pages/BookingConfirmation';
+import ReportDownload from './pages/ReportDownload';
 import {
-  BookingConfirmation,
   LegalPage,
   NotFound,
   SamplePage,
@@ -44,6 +45,8 @@ export default function App() {
         <Route path="/upload-prescription/" element={<UploadPrescription />} />
         <Route path="/welcome-page/" element={<WelcomePage />} />
         <Route path="/booking-confirmation/" element={<BookingConfirmation />} />
+        {/* Where an emailed or WhatsApped report link lands. */}
+        <Route path="/report/" element={<ReportDownload />} />
         <Route path="/patient-login/" element={<StubPage slug="patient-login" />} />
         <Route path="/doctor-login/" element={<StubPage slug="doctor-login" />} />
         <Route path="/privacy-policy/" element={<LegalPage slug="privacy-policy" />} />

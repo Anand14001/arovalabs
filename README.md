@@ -33,7 +33,11 @@ src/
   components/           Header, Footer, Hero, cards, carousels, FAQ, popups, widgets
   pages/                One component per route group
   layouts/MainLayout    Header + Footer + floating cart, scroll restoration
-  context/CartContext   Client-side cart (localStorage), no backend
+  lib/api.js            Public API client
+  lib/catalog.js        Catalogue queries + the view model that maps the API
+                        shape (paise, objects) onto what components render
+                        (rupees, slug arrays)
+  context/CartContext   Cart: ids in localStorage, prices resolved from the API
   data/                 All site content, separated from presentation
     site.js             Branding, contact details, navigation, footer
     homepage.js         Homepage sections in render order

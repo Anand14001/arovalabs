@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
-import { products } from '../../data/products';
-import { productCategories, productTags } from '../../data/taxonomies';
-import { blogs } from '../../data/blogs';
+import { useCategories, useProducts, useTags } from '../../lib/catalog';
+import { usePosts } from '../../lib/blog';
 import { mainNav } from '../../data/site';
 import { categoryHref, organHref } from '../../lib/listingRoutes';
 import { quickActions } from '../../data/homepage';
@@ -11,13 +10,13 @@ import { myAccountPage } from '../../data/pages';
  * The search index.
  *
  * Everything the site can actually navigate to, flattened into one list with a
- * `kind` so the overlay can group it. There is no API behind this — the whole
- * catalogue is already in the bundle — so searching is a local pass over ~35
- * entries. That is why there is no debounce and no loading state: both would be
- * theatre over an operation that completes in well under a millisecond.
+ * `kind` so the overlay can group it. The catalogue comes from the API now, but
+ * it is fetched once and cached, so searching remains a local pass over a few
+ * dozen entries — still no debounce and no per-keystroke loading state, because
+ * both would be theatre over an operation that completes in under a millisecond.
  *
- * Nothing here is invented. Titles, prices, categories and routes all come from
- * the existing data modules, and every `to` is a route App.jsx already serves.
+ * Blog posts and navigation are still local data; they move to the API with the
+ * content step. Every `to` is a route App.jsx already serves.
  */
 
 const PAGE_EXTRAS = [
@@ -25,7 +24,7 @@ const PAGE_EXTRAS = [
   { label: myAccountPage.title, to: '/my-account/' },
 ];
 
-function buildIndex() {
+function buildIndex({ products, categories, tags, posts }) {
   const entries = [];
 
   for (const product of products) {
@@ -59,7 +58,7 @@ function buildIndex() {
 
   // Only child categories: the two parents duplicate the /tests/ and
   // /packages/ listing pages that are already in the index as pages.
-  for (const category of productCategories.filter((c) => c.parent)) {
+  for (const category of categories.filter((c) => c.parent)) {
     entries.push({
       id: `category-${category.id}`,
       kind: 'category',
@@ -70,19 +69,19 @@ function buildIndex() {
     });
   }
 
-  for (const tag of productTags) {
+  for (const tag of tags) {
     entries.push({
       id: `tag-${tag.id}`,
       kind: 'organ',
       title: tag.name,
       subtitle: 'Browse by organ',
-      to: organHref(tag.slug),
+      to: organHref(tag.slug, products),
       icon: tag.icon,
       keywords: [tag.slug, 'organ'],
     });
   }
 
-  for (const post of blogs) {
+  for (const post of posts) {
     entries.push({
       id: `post-${post.id}`,
       kind: 'article',
@@ -154,7 +153,20 @@ const GROUPS = [
 const KIND_RANK = Object.fromEntries(GROUPS.map((g, i) => [g.kind, i]));
 
 export default function useSearchIndex(query) {
-  const index = useMemo(buildIndex, []);
+  const { products } = useProducts();
+  const { categories } = useCategories();
+  const { tags } = useTags();
+  const { posts } = usePosts({ limit: 50 });
+
+  /*
+   * Rebuilt whenever the catalogue arrives. Before it does, the index holds
+   * only the static entries — pages, blog posts — so the overlay is useful
+   * immediately rather than blank while the catalogue loads.
+   */
+  const index = useMemo(
+    () => buildIndex({ products, categories, tags, posts }),
+    [products, categories, tags, posts],
+  );
 
   return useMemo(() => {
     const q = query.trim().toLowerCase();

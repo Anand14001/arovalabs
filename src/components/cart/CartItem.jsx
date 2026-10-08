@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Minus, Plus, X } from 'lucide-react';
-import { formatPrice } from '../../data/products';
+import { formatPrice } from '../../lib/money';
 
 /*
  * One selected test or package.

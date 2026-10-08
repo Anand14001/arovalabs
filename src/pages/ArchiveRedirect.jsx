@@ -1,6 +1,6 @@
 import { Navigate, useParams } from 'react-router-dom';
-import { productCategories, productTags } from '../data/taxonomies';
-import { categoryHref, listingFor, organHref } from '../lib/listingRoutes';
+import { useProducts } from '../lib/catalog';
+import { listingFor, organHref, pathHref } from '../lib/listingRoutes';
 
 /*
  * The reference site's WooCommerce archives, folded into the listing pages.
@@ -13,22 +13,29 @@ import { categoryHref, listingFor, organHref } from '../lib/listingRoutes';
  * URLs, and anything already pointing at one should keep working. `replace`
  * keeps the dead path out of history, so Back from the listing returns to
  * wherever the visitor actually came from rather than bouncing through here.
+ *
+ * Unknown terms are not looked up any more. Resolving a category needs nothing
+ * but its path, and an unknown one lands on the listing its URL names — the
+ * same place a validated miss used to go. That keeps the redirect instant
+ * instead of holding a visitor on a blank page while the taxonomy loads.
  */
 export default function ArchiveRedirect({ mode }) {
   const { parent, child, slug } = useParams();
 
+  /*
+   * Tags are the exception: which listing an organ opens depends on what
+   * carries it. The catalogue is cached, so this is usually already resolved;
+   * if it is not, organHref falls back to the test listing rather than waiting.
+   */
+  const { products } = useProducts();
+
   if (mode === 'tag') {
-    const tag = productTags.find((t) => t.slug === slug);
-    return <Navigate to={tag ? organHref(tag.slug) : '/tests/'} replace />;
+    return <Navigate to={organHref(slug, products)} replace />;
   }
 
   if (mode === 'category') {
     const path = child ? `${parent}/${child}` : parent;
-    const category = productCategories.find((c) => c.path === path);
-
-    // An unknown term still lands somewhere sensible: the listing for whichever
-    // parent the URL names, falling back to tests.
-    return <Navigate to={category ? categoryHref(category) : listingFor(parent)} replace />;
+    return <Navigate to={path ? pathHref(path) : listingFor(parent)} replace />;
   }
 
   // /shop/ listed everything; tests is the larger half and the site's default

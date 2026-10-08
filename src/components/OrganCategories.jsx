@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import { organSection } from '../data/homepage';
-import { productTags } from '../data/taxonomies';
+import { useProducts, useTags } from '../lib/catalog';
 import SectionHeading from './SectionHeading';
 import { RevealGroup, RevealItem } from './motion/Reveal';
 import { organHref } from '../lib/listingRoutes';
@@ -25,6 +25,8 @@ import { organHref } from '../lib/listingRoutes';
  * before it ran out of room.
  */
 export default function OrganCategories() {
+  const { tags } = useTags();
+  const { products } = useProducts();
   return (
     <section className="section-lg rule-top">
       <div className="shell">
@@ -39,10 +41,10 @@ export default function OrganCategories() {
           stagger={0.06}
           className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
         >
-          {productTags.map((tag) => (
+          {tags.map((tag) => (
             <RevealItem key={tag.slug} as="li" y={16} className="flex">
               <Link
-                to={organHref(tag.slug)}
+                to={organHref(tag.slug, products)}
                 className="card card-interactive group flex w-full flex-col p-5"
               >
                 <span className="grid size-14 place-items-center rounded-xl bg-brand-light transition-colors duration-300 group-hover:bg-brand">

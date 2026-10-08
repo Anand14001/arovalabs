@@ -6,8 +6,8 @@ import TestCard from '../components/TestCard';
 import PackageCard from '../components/PackageCard';
 import Reveal, { RevealGroup, RevealItem } from '../components/motion/Reveal';
 import { listingPages } from '../data/pages';
-import { packages, tests } from '../data/products';
-import { orderByOptions, productCategories, productTags } from '../data/taxonomies';
+import { orderByOptions } from '../data/taxonomies';
+import { useCategories, useProducts, useTags } from '../lib/catalog';
 
 /*
  * /tests/ and /packages/ — the product catalogue.
@@ -37,8 +37,21 @@ import { orderByOptions, productCategories, productTags } from '../data/taxonomi
 export default function Listing({ which }) {
   const config = listingPages[which];
   const isPackage = config.type === 'package';
-  const source = isPackage ? packages : tests;
   const Card = isPackage ? PackageCard : TestCard;
+
+  /*
+   * The whole published catalogue is fetched once and narrowed here. See
+   * lib/catalog.js for why filtering stays in the browser at this size — in
+   * short, typing in the search box should not cost a network round trip.
+   */
+  const { products, isLoading, isError, refetch } = useProducts();
+  const { categories: allCategories } = useCategories();
+  const { tags: organTags } = useTags();
+
+  const source = useMemo(
+    () => products.filter((p) => (isPackage ? p.type === 'package' : p.type === 'test')),
+    [products, isPackage],
+  );
 
   // "All" is the reference site's own label for the unfiltered set, and
   // filters[0] is its noun for the type — "Tests" or "Packages".
@@ -54,11 +67,11 @@ export default function Listing({ which }) {
    */
   const categories = useMemo(
     () =>
-      productCategories
+      allCategories
         .filter((c) => c.parent === parentSlug)
         .map((c) => ({ ...c, count: source.filter((p) => p.cats.includes(c.slug)).length }))
         .filter((c) => c.count > 0),
-    [parentSlug, source],
+    [allCategories, parentSlug, source],
   );
 
   /*
@@ -76,12 +89,20 @@ export default function Listing({ which }) {
   const categoryParam = params.get('category');
   const organParam = params.get('organ');
 
+  /*
+   * A filter from the URL is trusted until the taxonomy arrives, then checked.
+   * Validating against an empty list during loading would silently drop the
+   * filter a visitor arrived with and show them the unfiltered catalogue.
+   */
   const category =
-    categoryParam && productCategories.some((c) => c.slug === categoryParam)
+    categoryParam && (!allCategories.length || allCategories.some((c) => c.slug === categoryParam))
       ? categoryParam
       : ALL;
 
-  const organ = productTags.some((t) => t.slug === organParam) ? organParam : null;
+  const organ =
+    organParam && (!organTags.length || organTags.some((t) => t.slug === organParam))
+      ? organParam
+      : null;
 
   const setCategory = (slug) => {
     const next = new URLSearchParams(params);
@@ -133,7 +154,7 @@ export default function Listing({ which }) {
 
   // An organ arrives from the homepage tiles and the search overlay; it has no
   // chip of its own, so it is surfaced as an active filter in the count row.
-  const activeOrgan = organ ? productTags.find((t) => t.slug === organ) : null;
+  const activeOrgan = organ ? organTags.find((t) => t.slug === organ) : null;
 
   const chips = [{ slug: ALL, name: ALL, count: source.length }, ...categories];
   const isGrid = view === 'grid';
@@ -311,7 +332,40 @@ export default function Listing({ which }) {
 
       {/* ----------------------------------------------------- results */}
       <section className="shell pb-16 pt-2 sm:pb-20">
-        {results.length === 0 ? (
+        {isLoading ? (
+          /*
+           * Skeleton cards rather than a spinner: the grid keeps its shape, so
+           * the page does not jump when the real cards land.
+           */
+          <ul
+            className={
+              isGrid ? 'mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3' : 'mt-8 space-y-3'
+            }
+            aria-busy="true"
+            aria-label="Loading products"
+          >
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li
+                key={i}
+                className={`animate-pulse rounded-2xl bg-ink/[0.04] ${isGrid ? 'h-80' : 'h-28'}`}
+              />
+            ))}
+          </ul>
+        ) : isError ? (
+          <Reveal className="py-24 text-center">
+            <p className="display-md text-ink">We couldn’t load the catalogue.</p>
+            <p className="section-sub mx-auto mt-2 max-w-md">
+              This is usually temporary. Try again, or call us on{' '}
+              <a href="tel:9442218998" className="text-brand underline">
+                9442218998
+              </a>{' '}
+              to book over the phone.
+            </p>
+            <button type="button" onClick={() => refetch()} className="btn-brand mt-7">
+              Try again
+            </button>
+          </Reveal>
+        ) : results.length === 0 ? (
           <Reveal className="py-24 text-center">
             <p className="display-md text-ink">No results matched “{query}”.</p>
             <button type="button" onClick={clearAll} className="btn-outline mt-7">

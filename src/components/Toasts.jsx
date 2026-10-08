@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Check, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { formatPrice } from '../data/products';
+import { formatPrice } from '../lib/money';
 
 /*
  * Toasts for cart additions.

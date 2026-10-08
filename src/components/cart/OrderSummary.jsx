@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Check } from 'lucide-react';
-import { formatPrice, productBenefits, taxNotice } from '../../data/products';
+import { formatPrice } from '../../lib/money';
+// Still static: these blocks are site settings and move to the API with the
+// content step, not the catalogue one.
+import { productBenefits, taxNotice } from '../../data/products';
 
 /*
  * The booking summary.

@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 import useSearchIndex from './useSearchIndex';
 import useRecentSearches from '../../hooks/useRecentSearches';
-import { formatPrice, frequentlyBookedTests } from '../../data/products';
-import { productTags } from '../../data/taxonomies';
+import { formatPrice } from '../../lib/money';
+import { useCuratedProducts, useProducts, useTags } from '../../lib/catalog';
+
 import { searchPlaceholder } from '../../data/site';
 import { carouselSections } from '../../data/homepage';
 import { organHref } from '../../lib/listingRoutes';
@@ -163,7 +164,9 @@ export default function SearchOverlay({ open, onClose }) {
 
   /* -------------------------------------------------- discovery data */
 
-  const popular = useMemo(() => frequentlyBookedTests.filter(Boolean).slice(0, 4), []);
+  const { items: booked } = useCuratedProducts('frequentlyBookedTests');
+
+  const popular = useMemo(() => booked.filter(Boolean).slice(0, 4), [booked]);
 
   if (!open) return null;
 
@@ -413,6 +416,13 @@ function ResultRow({ id, index, entry, active, onHover, onSelect }) {
 /* ---------------------------------------------------------- empty state */
 
 function EmptyState({ popular, recent, onPick, onForget, onClear, onNavigate }) {
+  /*
+   * The organ tiles need the tag list, and organHref needs the catalogue to
+   * decide which listing each organ opens. Both are cached queries shared with
+   * the rest of the page, so asking for them here costs no extra requests.
+   */
+  const { tags: organTags } = useTags();
+  const { products: allProducts } = useProducts();
   return (
     <div className="px-4 py-5 sm:px-6 sm:py-6">
       {recent.length > 0 && (
@@ -487,11 +497,11 @@ function EmptyState({ popular, recent, onPick, onForget, onClear, onNavigate }) 
         </h2>
 
         <ul className="flex flex-wrap gap-2">
-          {productTags.map((tag) => (
+          {organTags.map((tag) => (
             <li key={tag.slug}>
               <button
                 type="button"
-                onClick={() => onNavigate(organHref(tag.slug))}
+                onClick={() => onNavigate(organHref(tag.slug, allProducts))}
                 className="flex items-center gap-2 rounded-full py-2 pl-2 pr-4 text-[13px] font-medium text-body ring-1 ring-inset ring-ink/12 transition-all hover:text-brand hover:ring-brand/40"
               >
                 <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-light">
